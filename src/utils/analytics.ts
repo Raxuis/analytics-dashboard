@@ -1,3 +1,5 @@
+import { redis } from "@/lib/redis";
+
 type AnalyticsArgs = {
   retention?: number;
 };
@@ -10,7 +12,9 @@ export class Analytics {
   }
 
   async track(namespace: string, event: object = {}) {
+    const key = `analytics:${namespace}`;
     // db call to persist this event
+    await redis.hincrby(key, JSON.stringify(event), 1)
   }
 }
 export const analytics = new Analytics({ retention: 3600 });
