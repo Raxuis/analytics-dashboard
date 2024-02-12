@@ -4,7 +4,7 @@ import { analytics } from "@/utils/analytics";
 const Page = async () => {
   const TRACKING_DAYS = 7;
 
-  const pageview = await analytics.retrieveDays("pageview", 7);
+  const pageview = await analytics.retrieveDays("pageview", TRACKING_DAYS);
 
   const totalPageViews = pageview.reduce((acc, curr) => {
     return (acc + curr.events.reduce((acc, curr) => {
