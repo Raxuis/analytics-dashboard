@@ -46,6 +46,7 @@ export class Analytics {
         return -1;
       }
     })
+    return data;
   }
 
   async retrieve(namespace: string, date: string) {
