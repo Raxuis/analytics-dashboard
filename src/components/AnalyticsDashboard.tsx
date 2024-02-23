@@ -26,10 +26,10 @@ const Badge = ({ percentage }: { percentage: number }) => {
   return (
     <span
       className={`inline-flex gap-1 items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${isPositive
-          ? positiveClassname
-          : isNeutral
-            ? neutralClassname
-            : negativeClassname
+        ? positiveClassname
+        : isNeutral
+          ? neutralClassname
+          : negativeClassname
         }`}>
       {isPositive ? <ArrowUpRight className='h-3 w-3' /> : null}
       {isNeutral ? <ArrowRight className='h-3 w-3' /> : null}
@@ -52,7 +52,7 @@ const AnalyticsDashboard = ({
           <p className='text-tremor-default text-dark-tremor-content'>
             Avg. visitors/day
           </p>
-          <p className='text-3xl text-dark-tremor-content-strong font-semibold'>
+          <p className='text-3xl text-tremor-brand dark:text-dark-tremor-content-strong font-semibold'>
             {avgVisitorsPerDay}
           </p>
         </Card>
@@ -65,14 +65,14 @@ const AnalyticsDashboard = ({
               }
             />
           </p>
-          <p className='text-3xl text-dark-tremor-content-strong font-semibold'>
+          <p className='text-3xl text-tremor-brand dark:text-dark-tremor-content-strong font-semibold'>
             {amtVisitorsToday}
           </p>
         </Card>
       </div>
 
       <Card className='flex flex-col sm:grid grid-cols-4 gap-6'>
-        <h2 className='w-full text-dark-tremor-content-strong text-center sm:left-left font-semibold text-xl'>
+        <h2 className='w-full text-tremor-brand dark:text-dark-tremor-content-strong text-center sm:left-left font-semibold text-xl'>
           This weeks top visitors:
         </h2>
         <div className='col-span-3 flex items-center justify-between flex-wrap gap-8'>
