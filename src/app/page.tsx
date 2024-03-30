@@ -18,11 +18,11 @@ export default function Home() {
           Some of my social networks :
         </p>
         <ul className='flex gap-5 text-dark-tremor-content-subtle'>
-          <a target='_blank' href='https://github.com/Raxuis'><Github className='duration-500 dark:hover:dark:text-tremor-brand-faint hover:text-tremor-brand' /></a>
-          <a target='_blank' href='https://linkedin.com/in/raphael-raclot'><Linkedin className='duration-500 dark:hover:dark:text-tremor-brand-faint hover:text-tremor-brand' /></a>
-          <a target='_blank' href='https://X.com/I_Haruki_I'><Twitter className='duration-500 dark:hover:dark:text-tremor-brand-faint hover:text-tremor-brand' /></a>
-          <a target='_blank' href='/analytics'><Activity className='duration-500 dark:hover:dark:text-tremor-brand-faint hover:text-tremor-brand' /></a>
-          <a target='_blank' href='https://raphaelraclot.vercel.app'><Code className='duration-500 dark:hover:dark:text-tremor-brand-faint hover:text-tremor-brand' /></a>
+          <li><a target='_blank' href='https://github.com/Raxuis'><Github className='duration-500 dark:hover:dark:text-tremor-brand-faint hover:text-tremor-brand' /></a></li>
+          <li><a target='_blank' href='https://linkedin.com/in/raphael-raclot'><Linkedin className='duration-500 dark:hover:dark:text-tremor-brand-faint hover:text-tremor-brand' /></a></li>
+          <li><a target='_blank' href='https://X.com/I_Haruki_I'><Twitter className='duration-500 dark:hover:dark:text-tremor-brand-faint hover:text-tremor-brand' /></a></li>
+          <li><a target='_blank' href='/analytics'><Activity className='duration-500 dark:hover:dark:text-tremor-brand-faint hover:text-tremor-brand' /></a></li>
+          <li><a target='_blank' href='https://raphaelraclot.vercel.app'><Code className='duration-500 dark:hover:dark:text-tremor-brand-faint hover:text-tremor-brand' /></a></li>
         </ul>
       </Card>
     </main>
