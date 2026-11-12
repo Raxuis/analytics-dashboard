@@ -1,120 +1,90 @@
-'use client'
+import type { AnalyticsSummary } from "@/utils/analytics";
 
-import { analytics } from '@/utils/analytics'
-import { BarChart, Card } from '@tremor/react'
-import { ArrowDownRight, ArrowRight, ArrowUpRight } from 'lucide-react'
-import ReactCountryFlag from 'react-country-flag'
-
-interface AnalyticsDashboardProps {
-  avgVisitorsPerDay: string
-  amtVisitorsToday: number
-  timeseriesPageviews: Awaited<ReturnType<typeof analytics.retrieveDays>>
-  topCountries: [string, number][]
-}
-
-const Badge = ({ percentage }: { percentage: number }) => {
-  const isPositive = percentage > 0
-  const isNeutral = percentage === 0
-  const isNegative = percentage < 0
-
-  if (isNaN(percentage)) return null
-
-  const positiveClassname = 'bg-green-900/25 text-green-400 ring-green-400/25'
-  const neutralClassname = 'bg-zinc-900/25 text-zinc-400 ring-zinc-400/25'
-  const negativeClassname = 'bg-red-900/25 text-red-400 ring-red-400/25'
-
+export default function AnalyticsDashboard({
+  summary,
+}: {
+  summary: AnalyticsSummary;
+}) {
+  const maxViews = Math.max(1, ...summary.days.map((day) => day.count));
   return (
-    <span
-      className={`inline-flex gap-1 items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${isPositive
-        ? positiveClassname
-        : isNeutral
-          ? neutralClassname
-          : negativeClassname
-        }`}>
-      {isPositive ? <ArrowUpRight className='h-3 w-3' /> : null}
-      {isNeutral ? <ArrowRight className='h-3 w-3' /> : null}
-      {isNegative ? <ArrowDownRight className='h-3 w-3' /> : null}
-      {percentage.toFixed(0)}%
-    </span>
-  )
-}
-
-const AnalyticsDashboard = ({
-  avgVisitorsPerDay,
-  amtVisitorsToday,
-  timeseriesPageviews,
-  topCountries,
-}: AnalyticsDashboardProps) => {
-  return (
-    <div className='flex flex-col gap-6'>
-      <div className='grid w-full mx-auto grid-cols-1 sm:grid-cols-2 gap-6'>
-        <Card className='w-full'>
-          <p className='text-tremor-default text-dark-tremor-content'>
-            Avg. visitors/day
-          </p>
-          <p className='text-3xl text-tremor-brand dark:text-dark-tremor-content-strong font-semibold'>
-            {avgVisitorsPerDay}
-          </p>
-        </Card>
-        <Card className='w-full'>
-          <p className='flex gap-2.5 items-center text-tremor-default text-dark-tremor-content'>
-            Visitors today
-            <Badge
-              percentage={
-                (amtVisitorsToday / Number(avgVisitorsPerDay) - 1) * 100
-              }
-            />
-          </p>
-          <p className='text-3xl text-tremor-brand dark:text-dark-tremor-content-strong font-semibold'>
-            {amtVisitorsToday}
-          </p>
-        </Card>
-      </div>
-
-      <Card className='flex flex-col sm:grid grid-cols-4 gap-6'>
-        <h2 className='w-full text-tremor-brand dark:text-dark-tremor-content-strong text-center sm:left-left font-semibold text-xl'>
-          This weeks top visitors:
-        </h2>
-        <div className='col-span-3 flex items-center justify-between flex-wrap gap-8'>
-          {topCountries?.map(([countryCode, number]) => {
-            return (
-              <div key={countryCode} className='flex items-center gap-3 text-dark-tremor-content-strong'>
-                <p className='hidden sm:block text-tremor-content'>
-                  {countryCode}
-                </p>
-                <ReactCountryFlag
-                  className='text-5xl sm:text-3xl'
-                  svg
-                  countryCode={countryCode}
+    <div className="analytics-dashboard">
+      <section className="analytics-metrics" aria-label="Vues et clics">
+        <article>
+          <p>Vues de l’accueil</p>
+          <strong>{summary.totalPageviews}</strong>
+          <small>Sur sept jours</small>
+        </article>
+        <article>
+          <p>Vues aujourd’hui</p>
+          <strong>{summary.todayPageviews}</strong>
+          <small>Depuis minuit UTC</small>
+        </article>
+        <article>
+          <p>Clics sortants</p>
+          <strong>{summary.totalClicks}</strong>
+          <small>Sur sept jours</small>
+        </article>
+      </section>
+      <section className="analytics-chart">
+        <h2>Les passages, jour après jour</h2>
+        <div className="analytics-bars" role="list">
+          {summary.days.map((day) => (
+            <div
+              className="analytics-bar"
+              role="listitem"
+              key={day.date}
+              aria-label={`${day.date} : ${day.count} vues`}
+            >
+              <strong>{day.count}</strong>
+              <div className="analytics-bar-track">
+                <span
+                  style={{
+                    height: `${Math.max(2, (day.count / maxViews) * 100)}%`,
+                  }}
                 />
-
-                <p className='text-tremor-content sm:text-dark-tremor-content-strong'>
-                  {number}
-                </p>
               </div>
-            )
-          })}
+              <small>{day.date.slice(0, 5)}</small>
+            </div>
+          ))}
         </div>
-      </Card>
-
-      <Card>
-        {timeseriesPageviews ? (
-          <BarChart
-            allowDecimals={false}
-            showAnimation
-            data={timeseriesPageviews.map((day) => ({
-              name: day.date,
-              Visitors: day.events.reduce((acc, curr) => {
-                return acc + Object.values(curr)[0]!
-              }, 0),
-            }))}
-            categories={['Visitors']}
-            index='name'
-          />
-        ) : null}
-      </Card>
+      </section>
+      <div className="analytics-details">
+        <section className="analytics-destinations">
+          <h2>Les destinations</h2>
+          {summary.destinations.map((destination) => (
+            <div className="analytics-row" key={destination.id}>
+              <span>{destination.label}</span>
+              <strong>
+                {destination.count} clic{destination.count > 1 ? "s" : ""}
+              </strong>
+            </div>
+          ))}
+          {!summary.totalClicks && (
+            <p>Aucun clic enregistré sur cette période.</p>
+          )}
+        </section>
+        <section className="analytics-countries">
+          <h2>Les pays de passage</h2>
+          {summary.topCountries.length ? (
+            summary.topCountries.map(([country, count]) => (
+              <div className="analytics-row" key={country}>
+                <span>{country}</span>
+                <strong>
+                  {count} vue{count > 1 ? "s" : ""}
+                </strong>
+              </div>
+            ))
+          ) : (
+            <p>Aucun pays renseigné sur cette période.</p>
+          )}
+        </section>
+      </div>
+      <p className="analytics-note">
+        Une vue est un chargement de page, pas un visiteur unique. Les clics
+        comptent les activations de liens, pas les arrivées sur les sites
+        externes. Les robots et visites répétées peuvent être inclus. Les
+        données sont conservées sept jours.
+      </p>
     </div>
-  )
+  );
 }
-
-export default AnalyticsDashboard

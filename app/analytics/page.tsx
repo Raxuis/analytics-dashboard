@@ -1,65 +1,61 @@
+import Link from "next/link";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
+import { analytics, summarizeAnalytics } from "@/utils/analytics";
 import { getDate } from "@/utils";
-import { analytics } from "@/utils/analytics";
 
-const Page = async () => {
-  const TRACKING_DAYS = 7;
-
-  const pageviews = await analytics.retrieveDays("pageview", TRACKING_DAYS);
-
-  const totalPageViews = pageviews.reduce((acc, curr) => {
-    return (acc + curr.events.reduce((acc, curr) => {
-      return acc + Object.values(curr)[0]!
-    }, 0)
-    );
-  }, 0);
-
-  const avgVisitorsPerDay = (totalPageViews / TRACKING_DAYS).toFixed(1);
-
-  const amtVisitorsToday = pageviews.filter((ev) => ev.date === getDate()).reduce((acc, curr) => {
-    return (
-      acc + curr.events.reduce((acc, curr) => acc + Object.values(curr)[0]!, 0)
-    )
-  }, 0);
-
-  const topCountriesMap = new Map<string, number>();
-
-  for (let i = 0; i < pageviews.length; i++) {
-    const day = pageviews[i];
-    if (!day) continue;
-
-    for (let j = 0; j < day.events.length; j++) {
-      const event = day.events[j];
-      if (!event) continue;
-
-      const key = Object.keys(event)[0]!
-      const value = Object.values(event)[0]!
-
-      const parsedKey = JSON.parse(key);
-      const country = parsedKey?.country;
-
-      if (country) {
-        if (topCountriesMap.has(country)) {
-          const prevValue = topCountriesMap.get(country)!
-          topCountriesMap.set(country, prevValue + value);
-        } else {
-          topCountriesMap.set(country, value);
-        }
-      }
-
-    }
-  }
-
-  const topCountries = [...topCountriesMap.entries()].sort((a, b) => {
-    if (a[1] > b[1]) return -1
-    else return 1;
-  }).slice(0, 5);
-
-  return <div className="min-h-screen w-full py-12 flex justify-center items-center">
-    <div className="relative w-full max-w-6xl mx-auto text-white">
-      <AnalyticsDashboard avgVisitorsPerDay={avgVisitorsPerDay} amtVisitorsToday={amtVisitorsToday} timeseriesPageviews={pageviews} topCountries={topCountries} />
-    </div>
-  </div>;
+export const dynamic = "force-dynamic";
+export const metadata = {
+  title: "Activité · Raxuis",
+  robots: { index: false, follow: false },
 };
 
-export default Page;
+export default async function AnalyticsPage() {
+  let summary;
+  try {
+    const [pageviews, clicks] = await Promise.all([
+      analytics.retrieveDays("pageview", 7),
+      analytics.retrieveDays("outbound", 7),
+    ]);
+    summary = summarizeAnalytics(pageviews, clicks, getDate());
+  } catch {
+    return (
+      <main className="analytics-page">
+        <Link className="analytics-back" href="/">
+          ← Retour au passeport
+        </Link>
+        <div className="analytics-heading">
+          <p className="analytics-eyebrow">Activité</p>
+          <h1>Les chiffres attendront.</h1>
+          <p>
+            Les statistiques sont indisponibles pour le moment. Aucun chiffre ne
+            remplace les données manquantes.
+          </p>
+        </div>
+        <section className="analytics-unavailable">
+          <h2>Connexion aux statistiques indisponible</h2>
+          <p>
+            La configuration Redis ou la connexion au service doit être vérifiée
+            côté serveur.
+          </p>
+          <a href="/analytics">Réessayer</a>
+        </section>
+      </main>
+    );
+  }
+  return (
+    <main className="analytics-page">
+      <Link className="analytics-back" href="/">
+        ← Retour au passeport
+      </Link>
+      <div className="analytics-heading">
+        <p className="analytics-eyebrow">Les sept derniers jours</p>
+        <h1>Au fil des passages.</h1>
+        <p>
+          Vues de l’accueil et clics vers les destinations. Les journées sont
+          comptées en UTC.
+        </p>
+      </div>
+      <AnalyticsDashboard summary={summary} />
+    </main>
+  );
+}
