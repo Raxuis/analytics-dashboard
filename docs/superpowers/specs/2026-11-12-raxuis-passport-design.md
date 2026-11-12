@@ -24,3 +24,11 @@ Le dépôt utilise Upstash Redis et non PostHog. Le middleware attend actuelleme
 
 ## Validation
 Vérifier compilation, TypeScript et lint. Contrôler visuellement la scène, le chargement et les interactions en bureau et mobile. Vérifier clavier, réduction des animations, absence de WebGL, échec du chargement et fonctionnement immédiat des liens. Tester les bornes et erreurs Redis, ainsi que le comptage des destinations. Examiner le favicon aux petites tailles. Ne pas publier ni déployer automatiquement.
+
+## Révision visuelle demandée après le premier aperçu
+
+Le passeport prend désormais pour référence le passeport français fourni par l’utilisateur : couverture bordeaux, dorure, hiérarchie typographique centrée, grain du cuir et coins arrondis. L’emblème est personnel, composé du R original dans un écu entouré de branches. Les textes restent Raphaël Raclot et Développeur web. Les pages intérieures adoptent un papier ivoire rosé et des filigranes mauves. Le favicon suit la nouvelle palette bordeaux et or. Les interactions et la structure du site sont conservées.
+
+## Révision de la présentation générale
+
+L’utilisateur a rejeté la direction éditoriale et choisi explicitement le passeport centré, presque seul, avec quelques commandes discrètes. Cette décision remplace les anciennes propositions de hero et de cartes. Supprimer les slogans, le grand nom dans le hero, les mentions France Internet, Fait avec curiosité, les instructions de survol, Développeur web et les séparations de header. Les liens directs passent dans un panneau non modal accessible au clavier. Le passeport reste bordeaux et or. PRODUCT.md et DESIGN.md documentent la présentation finale.

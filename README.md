@@ -1,85 +1,49 @@
-<div align="center" id="top"> 
-  <img src="https://i.ibb.co/BNbKfw1/Analytics-GIF-from-Dribbble.gif" alt="Analytics Dashboard" />
+# Passeport Raxuis
 
-&#xa0;
+Une porte d’entrée personnelle vers le portfolio de Raphaël Raclot, GitHub, LinkedIn et X. Le passeport est dessiné et animé avec Three.js, React Three Fiber et GSAP. Les pages et matières sont produites localement, sans modèle 3D ni service externe. Les liens HTML restent disponibles pendant le chargement et sans WebGL.
 
-</div>
+## Développement
 
-<h1 align="center">📈 Analytics Dashboard 📉</h1>
+Node.js 20.9 ou plus récent.
 
-<p align="center">
-  <img alt="Github top language" src="https://img.shields.io/github/languages/top/Raxuis/analytics-dashboard?color=56BEB8">
-
-  <img alt="Github language count" src="https://img.shields.io/github/languages/count/Raxuis/analytics-dashboard?color=56BEB8">
-
-  <img alt="Repository size" src="https://img.shields.io/github/repo-size/Raxuis/analytics-dashboard?color=56BEB8">
-
-  <img alt="License" src="https://img.shields.io/github/license/Raxuis/analytics-dashboard?color=56BEB8">
-</p>
-
-<!-- Status -->
-<h4 align="center">
-	🚧  Analytics Dashboard 🚀 Under construction...  🚧
-</h4>
-<hr>
-<p align="center">
-  <a href="#dart-about">About</a> &#xa0; | &#xa0; 
-  <a href="#sparkles-features">Features</a> &#xa0; | &#xa0;
-  <a href="#rocket-technologies">Technologies</a> &#xa0; | &#xa0;
-  <a href="#white_check_mark-requirements">Requirements</a> &#xa0; | &#xa0;
-  <a href="#checkered_flag-starting">Starting</a> &#xa0; | &#xa0;
-  <a href="#memo-license">License</a> &#xa0; | &#xa0;
-  <a href="https://github.com/Raxuis" target="_blank">Author</a>
-</p>
-
-<br>
-
-## :dart: About
-
-An analytic dashboard linked to my several social networks links
-
-## :sparkles: Features
-
-:heavy_check_mark: Share my social network links\
-:heavy_check_mark: Take notes of the stats
-
-## :rocket: Technologies
-
-The following tools were used in this project:
-
-- [Node.js](https://nodejs.org/en/)
-- [React](https://pt-br.reactjs.org/)
-- [TypeScript](https://www.typescriptlang.org/)
-- [NextJS](https://nextjs.org/)
-
-## :white_check_mark: Requirements
-
-Before starting :checkered_flag:, you need to have [Git](https://git-scm.com) and [Node](https://nodejs.org/en/) installed.
-
-## :checkered_flag: Starting
-
-```bash
-# Clone this project
-$ git clone https://github.com/Raxuis/analytics-dashboard
-
-# Access
-$ cd analytics-dashboard
-
-# Install dependencies
-$ npm install
-
-# Run the project
-$ npm run dev
-
-# The server will initialize in the <http://localhost:3000>
+```sh
+npm ci
+npm run dev
 ```
 
-## :memo: License
+Ouvrir http://localhost:3000. Le bouton « Liens » ouvre les destinations directes et donne accès à « Vue simple » pour utiliser la présentation sans 3D. La vue simple présente les pages HTML avec les quatre liens et les voyages, et un retour à la scène interactive. L’interface respecte la préférence de réduction des animations. Le rendu fonctionne à la demande, sans boucle d’animation permanente lorsque l’objet est immobile.
 
-This project is under license from MIT. For more details, see the [LICENSE](LICENSE.md) file.
+```sh
+npm test
+npm run lint
+npm run build
+npm start
+```
 
-Made with :heart: by <a href="https://github.com/Raxuis" target="_blank">Raphaël</a>
+## Identité
 
-&#xa0;
+Le R d’origine est conservé dans `public/identity/raxuis-logo.png`. Le favicon SVG adapte exactement sa silhouette en dorure sur une couverture bordeaux. `npm run icons` régénère l’emblème personnel, puis génère le favicon ICO aux tailles 16, 32 et 48 pixels, l’icône Apple et un aperçu PNG.
 
-<a href="#top">Back to top</a>
+Les polices DM Sans et Space Grotesk sont distribuées localement avec leurs licences dans `public/fonts`. Le texte, les destinations et la mesure des clics sont définis dans `src/components/passport/destinations.ts`. Les matières imprimées sont dans `passport-textures.ts`; la géométrie, les shaders et les animations sont dans `PassportScene.tsx`.
+
+## Statistiques
+
+Copier `.env.example` vers `.env.local` et renseigner les variables Upstash côté serveur, ou configurer leurs équivalents dans Vercel. Ne jamais les préfixer avec `NEXT_PUBLIC_` ni les envoyer au navigateur.
+
+La configuration recommandée utilise `UPSTASH_REDIS_REST_URL` et `UPSTASH_REDIS_REST_TOKEN`. Les noms `REDIS_URL` et `REDIS_KEY` sont également acceptés. Le déploiement historique utilisant uniquement `REDIS_KEY` conserve son endpoint d’origine comme repli; migrer vers une URL explicite est recommandé.
+
+Le middleware enregistre les vues de l’accueil en arrière-plan. Les liens envoient un événement distinct vers `/api/events` sans retarder la navigation. Les requêtes Redis sont interrompues après 1,8 seconde, sans nouvelle tentative automatique. Le tableau de bord `/analytics` présente un état indisponible lorsque le service ne répond pas, et n’invente aucun chiffre. Les données sont conservées sept jours et agrégées en UTC. Les statistiques comptent les chargements et clics, pas des visiteurs uniques. Les robots et activations répétées peuvent être inclus.
+
+Ce tableau de bord reste public, comme dans le dépôt d’origine, et n’est pas indexable. Il n’expose que des agrégats. Les compteurs anonymes ne sont pas une source de confiance pour facturation ou décisions critiques. La validation en local ne prouve pas la disponibilité de la base en production; vérifier les variables et les logs Vercel avant publication.
+
+## Choix et validation
+
+La conception validée et le plan figurent dans `docs/superpowers`. Aucun déploiement automatique n’est effectué par ce projet. Les tests couvrent le délai réel d’annulation des appels Redis, la compatibilité de configuration, les erreurs de stockage, l’agrégation et la validation de l’endpoint.
+
+Le diagnostic du 504 en production est consigné dans `docs/superpowers/specs/2026-11-12-analytics-diagnosis.md`. L’ancien endpoint ne résout actuellement plus dans le DNS; sa compatibilité de configuration ne rétablit donc pas les statistiques.
+
+La page d’accueil suit désormais la direction confirmée : le passeport centré, presque seul, des commandes discrètes et un panneau de liens. `PRODUCT.md`, `DESIGN.md` et `.impeccable/surfaces/app-page-tsx.md` consignent cette décision. Aucun habillage éditorial, slogan ou texte d’ambiance ne doit être réintroduit.
+
+## Contribuer au passeport
+
+Les voyages et les villes se modifient dans `src/components/passport/travel-content.ts`. Les pages se créent automatiquement. 177 silhouettes de pays sont déjà préparées. Voir [le guide de contribution](docs/passport-contributing.md) et [les codes pays](docs/passport-countries.md).

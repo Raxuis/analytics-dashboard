@@ -1,0 +1,538 @@
+import * as THREE from "three";
+import { TRAVEL_MAP, cityMarkers } from "./travel-layout";
+import { travelPages, countryName, type TravelMemory } from "./travel-content";
+import { PAGE_LINKS, type VisaRegion } from "./passport-layout";
+import { destinations, type DestinationId } from "./destinations";
+
+const W = 1024,
+  H = 1440;
+const ink = "#393747",
+  muted = "#8b808d",
+  red = "#b55d43";
+export type PassportTextures = {
+  cover: THREE.CanvasTexture;
+  leather: THREE.CanvasTexture;
+  foil: THREE.CanvasTexture;
+  identity: THREE.CanvasTexture;
+  visas: THREE.CanvasTexture;
+  spreads: { left: THREE.CanvasTexture; right: THREE.CanvasTexture }[];
+  environment: THREE.CanvasTexture;
+  dispose: () => void;
+};
+function canvas(w = W, h = H) {
+  const el = document.createElement("canvas");
+  el.width = w;
+  el.height = h;
+  const c = el.getContext("2d");
+  if (!c) throw new Error("Canvas indisponible");
+  return { el, c };
+}
+function texture(el: HTMLCanvasElement, color = true) {
+  const t = new THREE.CanvasTexture(el);
+  if (color) t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 4;
+  return t;
+}
+function text(
+  c: CanvasRenderingContext2D,
+  str: string,
+  x: number,
+  y: number,
+  size = 24,
+  color = ink,
+  font = "DM Sans",
+  align: CanvasTextAlign = "left",
+  weight = 400,
+) {
+  c.fillStyle = color;
+  c.font = `${weight} ${size}px "${font}"`;
+  c.textAlign = align;
+  c.fillText(str, x, y);
+}
+function line(
+  c: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  color = "#adb5a5",
+) {
+  c.strokeStyle = color;
+  c.lineWidth = 1;
+  c.beginPath();
+  c.moveTo(x, y);
+  c.lineTo(x + w, y);
+  c.stroke();
+}
+function paper(page = 1) {
+  const { el, c } = canvas();
+  c.fillStyle = "#f2e9df";
+  c.fillRect(0, 0, W, H);
+  const wash = c.createLinearGradient(0, 0, W, H);
+  wash.addColorStop(0, "#d7e4ed80");
+  wash.addColorStop(0.45, "#f0d9df55");
+  wash.addColorStop(1, "#d9d6e375");
+  c.fillStyle = wash;
+  c.fillRect(0, 0, W, H);
+  let seed = 71 + page;
+  for (let i = 0; i < 18000; i++) {
+    seed = (seed * 16807) % 2147483647;
+    const x = seed % W;
+    seed = (seed * 16807) % 2147483647;
+    const y = seed % H;
+    c.fillStyle = i % 2 ? "#7c687412" : "#ffffff36";
+    c.fillRect(x, y, 1, 1);
+  }
+  // Fine printed guilloché, rather than a decorative web layout.
+  for (let j = 0; j < 65; j++) {
+    c.strokeStyle = j % 2 ? "#9c82a51d" : "#7295af1c";
+    c.lineWidth = 0.7;
+    c.beginPath();
+    for (let y = 0; y <= H; y += 6) {
+      const x =
+        W * 0.5 +
+        Math.sin(y * 0.006 + j * 0.075) * 400 +
+        Math.sin(y * 0.017 + j * 0.15) * 45;
+      if (!y) c.moveTo(x, y);
+      else c.lineTo(x, y);
+    }
+    c.stroke();
+  }
+  c.save();
+  c.globalAlpha = 0.055;
+  if (page <= 2)
+    text(c, "R", W * 0.58, H * 0.62, 620, "#6b5c88", "DM Sans", "center", 500);
+  c.restore();
+  // Binding shadow and a restrained page number are part of the document.
+  const fold = c.createLinearGradient(0, 0, 75, 0);
+  fold.addColorStop(0, "#55465528");
+  fold.addColorStop(1, "#55465500");
+  c.fillStyle = fold;
+  c.fillRect(0, 0, 75, H);
+  text(
+    c,
+    String(page).padStart(2, "0"),
+    W - 64,
+    H - 55,
+    21,
+    "#7c6c87",
+    "monospace",
+    "right",
+  );
+  return { el, c };
+}
+function documentHeader(c: CanvasRenderingContext2D, title: string) {
+  text(c, "PASSEPORT PERSONNEL", 68, 89, 25, "#4d506a", "DM Sans", "left", 600);
+  text(c, "RAXUIS", W - 68, 89, 22, "#786b85", "DM Sans", "right");
+  text(c, title, 68, 149, 23, "#786b85", "DM Sans", "left", 500);
+}
+function field(
+  c: CanvasRenderingContext2D,
+  label: string,
+  value: string,
+  x: number,
+  y: number,
+  size = 39,
+) {
+  text(c, label.toUpperCase(), x, y, 24, "#54465f", "DM Sans");
+  text(c, value, x, y + 49, size, "#31344b", "DM Sans", "left", 500);
+}
+function stampOutline(c: CanvasRenderingContext2D, r: VisaRegion, inset = 0) {
+  const w = r.width * W - inset * 2,
+    h = r.height * H - inset * 2;
+  c.beginPath();
+  if (r.shape === "oval") c.ellipse(0, 0, w / 2, h / 2, 0, 0, Math.PI * 2);
+  else c.roundRect(-w / 2, -h / 2, w, h, 6);
+}
+function printedVisa(c: CanvasRenderingContext2D, r: VisaRegion) {
+  const d = destinations.find((d) => d.id === r.id)!;
+  const w = r.width * W,
+    h = r.height * H;
+  c.save();
+  c.translate((r.x + r.width / 2) * W, (r.y + r.height / 2) * H);
+  c.rotate(r.angle);
+  c.strokeStyle = r.ink;
+  c.lineWidth = 3;
+  stampOutline(c, r);
+  c.stroke();
+  c.lineWidth = 1;
+  stampOutline(c, r, 9);
+  c.stroke();
+  const label = d.label.toUpperCase();
+  text(c, "RAXUIS", 0, -h * 0.27, 17, r.ink, "monospace", "center");
+  const fontSize =
+    r.id === "linkedin" ? Math.min(40, w * 0.1) : Math.min(51, w * 0.12);
+  text(c, label, 0, 8, fontSize, r.ink, "DM Sans", "center", 700);
+  const handle =
+    r.id === "portfolio"
+      ? d.domain
+      : r.id === "github"
+        ? "github.com/Raxuis"
+        : r.id === "linkedin"
+          ? "Raphaël Raclot"
+          : "@I_Haruki_I";
+  text(
+    c,
+    handle,
+    0,
+    h * 0.27,
+    Math.min(29, w * 0.067),
+    r.ink,
+    "DM Sans",
+    "center",
+    600,
+  );
+  c.restore();
+}
+function travelVignette(
+  c: CanvasRenderingContext2D,
+  memory: TravelMemory,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  angle: number,
+  tint: string,
+) {
+  c.save();
+  c.translate(x, y);
+  c.rotate(angle);
+  c.shadowColor = "#242c3638";
+  c.shadowBlur = 9;
+  c.shadowOffsetX = 3;
+  c.shadowOffsetY = 5;
+  c.fillStyle = "#f6f1e8";
+  c.fillRect(0, 0, w, h);
+  c.shadowColor = "transparent";
+  c.fillStyle = tint + "24";
+  c.fillRect(0, 0, w, 70);
+  // Fine security linework belongs to the vignette substrate.
+  c.save();
+  c.beginPath();
+  c.rect(0, 70, w, h - 70);
+  c.clip();
+  c.strokeStyle = tint + "23";
+  c.lineWidth = 1;
+  for (let i = -h; i < w + h; i += 9) {
+    c.beginPath();
+    for (let t = 0; t <= h; t += 4) {
+      const px = i + Math.sin(t / 38) * 17;
+      if (t === 0) c.moveTo(px, t);
+      else c.lineTo(px, t);
+    }
+    c.stroke();
+  }
+  c.restore();
+  c.strokeStyle = tint + "8c";
+  c.lineWidth = 1.5;
+  c.strokeRect(10, 10, w - 20, h - 20);
+  text(
+    c,
+    countryName(memory.country).toLocaleUpperCase("fr"),
+    25,
+    47,
+    Math.min(32, w * 0.072),
+    tint,
+    "DM Sans",
+    "left",
+    700,
+  );
+  text(c, "VOYAGES PERSONNELS", 25, 109, 17, tint, "DM Sans", "left", 500);
+  if (memory.visits)
+    text(
+      c,
+      `${memory.visits} ${memory.visits === 1 ? "visite" : "visites"}`,
+      25,
+      168,
+      43,
+      "#282638",
+      "DM Sans",
+      "left",
+      600,
+    );
+  else text(c, "Visité", 25, 168, 39, "#282638", "DM Sans", "left", 600);
+  if (memory.places)
+    text(
+      c,
+      memory.places.join(", "),
+      25,
+      215,
+      26,
+      "#393747",
+      "DM Sans",
+      "left",
+      500,
+    );
+  text(c, "RAPHAËL RACLOT", 25, h - 27, 18, tint, "DM Sans", "left", 500);
+  c.restore();
+}
+
+export function visaHighlight(
+  page: number,
+  hovered: DestinationId | null,
+  selected: DestinationId | null,
+  pressed: DestinationId | null,
+) {
+  const { el, c } = canvas();
+  for (const r of PAGE_LINKS[page] ?? []) {
+    if (r.id !== hovered && r.id !== selected && r.id !== pressed) continue;
+    c.save();
+    c.translate((r.x + r.width / 2) * W, (r.y + r.height / 2) * H);
+    c.rotate(r.angle);
+    c.fillStyle =
+      r.id === pressed
+        ? "#455f9e55"
+        : r.id === selected
+          ? "#49659d38"
+          : "#6074b01f";
+    c.strokeStyle =
+      r.id === selected || r.id === pressed ? "#31497ee6" : "#596faed9";
+    c.lineWidth = r.id === selected ? 5 : 3;
+    stampOutline(c, r, -4);
+    c.fill();
+    c.stroke();
+    if (r.id === selected) {
+      c.lineWidth = 4;
+      c.beginPath();
+      c.moveTo(-r.width * W * 0.4, r.height * H * 0.31);
+      c.lineTo(-r.width * W * 0.37, r.height * H * 0.35);
+      c.lineTo(-r.width * W * 0.31, r.height * H * 0.25);
+      c.stroke();
+    }
+    c.restore();
+  }
+  return texture(el);
+}
+function image(url: string) {
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const i = new Image();
+    i.onload = () => resolve(i);
+    i.onerror = () => reject(new Error(`Impossible de charger ${url}`));
+    i.src = url;
+  });
+}
+export async function loadPassportTextures(
+  progress: (n: number) => void,
+): Promise<PassportTextures> {
+  let done = 0;
+  const uniqueCountries = [
+    ...new Set(travelPages.map((p) => p.memory.country)),
+  ];
+  const countryImages = new Map<string, HTMLImageElement>();
+  const loaded = () => progress((++done / (3 + uniqueCountries.length)) * 100);
+  const [portrait, crest] = await Promise.all([
+    image("/avatar.jpg").then((v) => {
+      loaded();
+      return v;
+    }),
+    image("/identity/passport-crest.svg").then((v) => {
+      loaded();
+      return v;
+    }),
+    Promise.all(
+      uniqueCountries.map(async (code) => {
+        countryImages.set(code, await image(`/identity/countries/${code}.svg`));
+        loaded();
+      }),
+    ),
+    Promise.all([
+      new FontFace("DM Sans", "url(/fonts/dm-sans.ttf)").load(),
+      new FontFace("Space Grotesk", "url(/fonts/space-grotesk.ttf)").load(),
+    ]).then((fonts) => {
+      fonts.forEach((f) => document.fonts.add(f));
+      loaded();
+      return null;
+    }),
+  ]);
+  const cover = canvas();
+  const c = cover.c;
+  c.fillStyle = "#3d0827";
+  c.fillRect(0, 0, W, H);
+  const edge = c.createLinearGradient(0, 0, W, 0);
+  edge.addColorStop(0, "#10030e88");
+  edge.addColorStop(0.055, "#ffffff04");
+  edge.addColorStop(0.4, "#791a3c0a");
+  edge.addColorStop(1, "#18061535");
+  c.fillStyle = edge;
+  c.fillRect(0, 0, W, H);
+  let noise = 5;
+  for (let i = 0; i < 100000; i++) {
+    noise = (noise * 16807) % 2147483647;
+    const x = noise % W;
+    noise = (noise * 16807) % 2147483647;
+    const y = noise % H;
+    c.fillStyle = i % 2 ? "#d6a8af0b" : "#08000a1c";
+    c.fillRect(x, y, 1.5, 1.5);
+  }
+  // A separate alpha mask puts all lettering and the personal crest in metallic foil.
+  const foil = canvas();
+  text(
+    foil.c,
+    "Raphaël Raclot",
+    W / 2,
+    190,
+    45,
+    "#ffffff",
+    "DM Sans",
+    "center",
+  );
+  text(foil.c, "Raxuis", W / 2, 250, 41, "#ffffff", "DM Sans", "center");
+  foil.c.drawImage(crest, 232, 424, 560, 560);
+  text(
+    foil.c,
+    "PASSEPORT",
+    W / 2,
+    1195,
+    55,
+    "#ffffff",
+    "DM Sans",
+    "center",
+    600,
+  );
+  foil.c.strokeStyle = "#ffffff";
+  foil.c.lineWidth = 4;
+  foil.c.beginPath();
+  foil.c.roundRect(W / 2 - 43, 1246, 86, 52, 2);
+  foil.c.stroke();
+  foil.c.beginPath();
+  foil.c.arc(W / 2, 1272, 16, 0, Math.PI * 2);
+  foil.c.stroke();
+  foil.c.beginPath();
+  foil.c.moveTo(W / 2 - 43, 1272);
+  foil.c.lineTo(W / 2 - 16, 1272);
+  foil.c.moveTo(W / 2 + 16, 1272);
+  foil.c.lineTo(W / 2 + 43, 1272);
+  foil.c.stroke();
+  const leather = canvas(256, 256);
+  for (let y = 0; y < 256; y++)
+    for (let x = 0; x < 256; x++) {
+      const v = 95 + ((x * 17 + y * 31 + ((x * y) % 73)) % 65);
+      leather.c.fillStyle = `rgb(${v},${v},${v})`;
+      leather.c.fillRect(x, y, 1, 1);
+    }
+  const id = paper(1);
+  documentHeader(id.c, "");
+  // One aligned identity block, with a true portrait crop and a separate machine-readable zone.
+  const photoRatio = 319 / 440;
+  const cropHeight = Math.min(portrait.height, portrait.width / photoRatio);
+  const cropWidth = cropHeight * photoRatio;
+  id.c.drawImage(
+    portrait,
+    (portrait.width - cropWidth) / 2,
+    (portrait.height - cropHeight) / 2,
+    cropWidth,
+    cropHeight,
+    73,
+    260,
+    319,
+    440,
+  );
+  text(id.c, "IDENTITÉ", 73, 166, 42, "#31344b", "DM Sans", "left", 600);
+  field(id.c, "Nom", "RACLOT", 455, 282, 49);
+  field(id.c, "Prénom", "RAPHAËL", 455, 445, 47);
+  field(id.c, "Pseudonyme", "RAXUIS", 455, 608, 45);
+  line(id.c, 73, 793, W - 146, "#84768e55");
+  field(id.c, "Site personnel", "raphaelraclot.dev", 73, 870, 43);
+  id.c.fillStyle = "#d8cbdc75";
+  id.c.fillRect(55, 1135, W - 110, 195);
+  text(
+    id.c,
+    "RAXUIS<<RACLOT<<RAPHAEL<<<<<<<<",
+    79,
+    1215,
+    32,
+    "#242139",
+    "monospace",
+  );
+  text(
+    id.c,
+    "RAPHAELRACLOT<DEV<<<<<<<<<<<<<<",
+    79,
+    1270,
+    32,
+    "#242139",
+    "monospace",
+  );
+  const visas = paper(2);
+  documentHeader(visas.c, "VISAS");
+  PAGE_LINKS[0]!.forEach((r) => printedVisa(visas.c, r));
+  const travelSheets = travelPages.map((page, index) => {
+    const sheet = paper(index + 3);
+    documentHeader(sheet.c, "VOYAGES");
+    const map = countryImages.get(page.memory.country)!;
+    sheet.c.drawImage(
+      map,
+      TRAVEL_MAP.x,
+      TRAVEL_MAP.y,
+      TRAVEL_MAP.width,
+      TRAVEL_MAP.height,
+    );
+    travelVignette(
+      sheet.c,
+      page.memory,
+      85,
+      1080,
+      Math.min(850, 500 + (page.memory.places?.length ?? 0) * 50),
+      page.memory.places ? 285 : 260,
+      -0.025,
+      "#314c79",
+    );
+    // Stipple-weight ripples are fixed on the paper, not a looping animation.
+    for (const marker of cityMarkers(page.memory)) {
+      for (const [radius, alpha] of [
+        [7, 0.9],
+        [14, 0.5],
+        [22, 0.25],
+      ]) {
+        sheet.c.strokeStyle = `rgba(39,83,139,${alpha})`;
+        sheet.c.lineWidth = 1.4;
+        sheet.c.beginPath();
+        sheet.c.arc(marker.x, marker.y, radius!, 0, Math.PI * 2);
+        sheet.c.stroke();
+      }
+      sheet.c.fillStyle = "#244d83";
+      sheet.c.beginPath();
+      sheet.c.arc(marker.x, marker.y, 2.5, 0, Math.PI * 2);
+      sheet.c.fill();
+    }
+    return texture(sheet.el);
+  });
+  const spreads = [{ left: texture(id.el), right: texture(visas.el) }];
+  for (let i = 0; i < travelSheets.length; i += 2)
+    spreads.push({
+      left: travelSheets[i]!,
+      right: travelSheets[i + 1] ?? texture(paper(i + 4).el),
+    });
+  const env = canvas(512, 256);
+  const eg = env.c.createLinearGradient(0, 0, 0, 256);
+  eg.addColorStop(0, "#1d2a39");
+  eg.addColorStop(0.35, "#7f9d95");
+  eg.addColorStop(0.47, "#e0d4b5");
+  eg.addColorStop(0.52, "#9baeb2");
+  eg.addColorStop(0.62, "#172730");
+  eg.addColorStop(1, "#081219");
+  env.c.fillStyle = eg;
+  env.c.fillRect(0, 0, 512, 256);
+  env.c.fillStyle = "#fff5d5";
+  env.c.fillRect(110, 20, 40, 140);
+  env.c.fillStyle = "#6678a5";
+  env.c.fillRect(350, 25, 95, 90);
+  const environment = texture(env.el);
+  environment.mapping = THREE.EquirectangularReflectionMapping;
+  const all = {
+    cover: texture(cover.el),
+    foil: texture(foil.el),
+    leather: texture(leather.el, false),
+    identity: spreads[0]!.left,
+    visas: spreads[0]!.right,
+    environment,
+  };
+  return {
+    ...all,
+    spreads,
+    dispose: () =>
+      new Set([
+        ...Object.values(all),
+        ...spreads.flatMap((s) => [s.left, s.right]),
+      ]).forEach((t) => t.dispose()),
+  };
+}

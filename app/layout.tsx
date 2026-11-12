@@ -1,29 +1,42 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
-import { getServerUrl } from "./get-server-url";
 
-const inter = Inter({ subsets: ["latin"] });
-
+const sans = localFont({
+  src: "../public/fonts/dm-sans.ttf",
+  variable: "--font-sans",
+  display: "swap",
+});
+const display = localFont({
+  src: "../public/fonts/space-grotesk.ttf",
+  variable: "--font-display",
+  display: "swap",
+});
 export const metadata: Metadata = {
-  title: "Raphaël | Analytics",
+  metadataBase: new URL("https://raxuis.vercel.app"),
+  title: "Raxuis · Raphaël Raclot",
   description:
-    "An Analytics Dashboard Website made by Raphaël | Raxuis to check his stats!",
-  keywords: "Raphaël, Raxuis, Analytics, Next.js, React.js",
+    "Raphaël Raclot, développeur web. Mon portfolio, mon code et quelques façons de se retrouver.",
   icons: {
-    icon: '/favicon.ico',
+    icon: [
+      { url: "/favicon.ico", sizes: "16x16 32x32 48x48" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/apple-touch-icon.png",
   },
-  metadataBase: new URL(getServerUrl())
+  openGraph: {
+    title: "Raxuis · Raphaël Raclot",
+    description: "Un passeport vers mes projets et mon univers.",
+    locale: "fr_FR",
+    type: "website",
+  },
 };
-
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.className} dark bg-[#020817]`}>{children}</body>
+    <html lang="fr">
+      <body className={`${sans.variable} ${display.variable}`}>{children}</body>
     </html>
   );
 }
