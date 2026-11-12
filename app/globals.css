@@ -980,3 +980,47 @@ p {
 .scene-canvas canvas {
   touch-action: none;
 }
+
+.city-index {
+  display: flex;
+  flex-wrap: nowrap;
+  column-gap: 14px;
+  margin: 8px 0 0;
+  padding: 6px 2px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #89709c70 transparent;
+}
+.city-index > button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0;
+  color: #314c79;
+  font-size: 12px;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 4px;
+}
+.city-index > button:hover,
+.city-index > button[aria-expanded="true"] {
+  color: #171d38;
+  text-decoration-style: solid;
+}
+.city-detail {
+  margin: 4px 0 15px;
+  padding: 12px 14px;
+  background: #dfdbe4;
+  color: #302739;
+  border-radius: 5px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.city-detail strong {
+  font-weight: 600;
+}
+.city-detail p {
+  margin: 4px 0 0;
+}

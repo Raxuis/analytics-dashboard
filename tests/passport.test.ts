@@ -87,7 +87,10 @@ test("simple view exposes all four real links immediately without a canvas or a 
   ])
     assert.ok(html.includes(label));
   assert.ok(!html.includes("<canvas"));
-  assert.ok(!/\shidden(?:=|\s|>)/.test(html));
+  assert.ok(
+    !/<(?:nav|section)[^>]*\shidden(?:=|\s|>)/.test(html),
+    "pages and destination navigation are immediately visible",
+  );
   assert.ok(!html.includes("dialog"));
 });
 

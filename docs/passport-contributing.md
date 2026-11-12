@@ -52,6 +52,8 @@ npm run countries:generate
 
 Cette commande télécharge la source publique Natural Earth et régénère les silhouettes, le catalogue et la liste des codes. Elle n'est nécessaire ni pour ajouter un voyage avec un code existant, ni pour lancer le site. Ne modifie pas les fichiers générés à la main ; ils seraient remplacés lors de cette commande.
 
-La précision des contours est adaptée à une page de passeport, pas à une carte de navigation. Plusieurs villes très proches peuvent avoir des ondes qui se recouvrent ; leur point central reste ciblable individuellement et la vue simple donne accès à chaque infobulle.
+La précision des contours est adaptée à une page de passeport, pas à une carte de navigation. Plusieurs villes très proches peuvent avoir des ondes qui se recouvrent ; la vue simple propose aussi un bouton par nom de ville sous la carte, pour sélectionner chacune indépendamment au toucher.
 
 Les États-Unis utilisent trois projections coordonnées : continent, Alaska et Hawaï. Une ville ajoutée en Alaska ou à Hawaï sera placée dans le bon encart automatiquement.
+
+La liste des villes sous chaque carte conserve une seule ligne et défile horizontalement si nécessaire. Tu peux donc ajouter des villes sans modifier la mise en page. Chaque nom reste accessible au clavier et au toucher.
