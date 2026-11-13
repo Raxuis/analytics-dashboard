@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { TRAVEL_MAP, cityMarkers } from "./travel-layout";
 import { travelPages, countryName, type TravelMemory } from "./travel-content";
-import { PAGE_LINKS, type VisaRegion } from "./passport-layout";
+import { PAGE_LINKS, visaPapers, type VisaRegion } from "./passport-layout";
 import { destinations, type DestinationId } from "./destinations";
 
 const W = 1024,
@@ -150,18 +150,19 @@ function printedVisa(c: CanvasRenderingContext2D, r: VisaRegion) {
   c.save();
   c.translate((r.x + r.width / 2) * W, (r.y + r.height / 2) * H);
   c.rotate(r.angle);
+  c.fillStyle = visaPapers[r.id];
   c.strokeStyle = r.ink;
   c.lineWidth = 3;
   stampOutline(c, r);
+  c.fill();
   c.stroke();
   c.lineWidth = 1;
   stampOutline(c, r, 9);
   c.stroke();
   const label = d.label.toUpperCase();
-  text(c, "RAXUIS", 0, -h * 0.27, 17, r.ink, "monospace", "center");
   const fontSize =
     r.id === "linkedin" ? Math.min(40, w * 0.1) : Math.min(51, w * 0.12);
-  text(c, label, 0, 8, fontSize, r.ink, "DM Sans", "center", 700);
+  text(c, label, 0, -h * 0.07, fontSize, r.ink, "DM Sans", "center", 700);
   const handle =
     r.id === "portfolio"
       ? d.domain
@@ -174,7 +175,7 @@ function printedVisa(c: CanvasRenderingContext2D, r: VisaRegion) {
     c,
     handle,
     0,
-    h * 0.27,
+    h * 0.23,
     Math.min(29, w * 0.067),
     r.ink,
     "DM Sans",

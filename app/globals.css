@@ -777,6 +777,7 @@ p {
   gap: 11px;
 }
 .simple-destinations > a {
+  background: var(--visa-paper);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -788,11 +789,11 @@ p {
   color: #49355f;
 }
 .simple-destinations > a:hover {
-  background: #d8d2e7;
+  filter: brightness(0.96);
   border-color: #665082;
 }
 .simple-destinations > a:active {
-  background: #c6bfda;
+  filter: brightness(0.9);
 }
 .simple-destinations > a:focus-visible {
   outline-color: #594174;

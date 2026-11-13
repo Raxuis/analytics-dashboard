@@ -5,6 +5,12 @@ export const PAGE_HEIGHT = 4.05;
 export const SHEET_WIDTH = PAGE_WIDTH - 0.09;
 export const SHEET_HEIGHT = PAGE_HEIGHT - 0.13;
 export const PAGE_PIXELS = { width: 1024, height: 1440 };
+export const visaPapers: Record<DestinationId, string> = {
+  portfolio: "#d7e3ef",
+  github: "#e4d9ed",
+  linkedin: "#d3e8df",
+  x: "#efddce",
+};
 export type VisaRegion = {
   id: DestinationId;
   x: number;
