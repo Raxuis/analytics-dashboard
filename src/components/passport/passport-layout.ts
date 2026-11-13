@@ -11,6 +11,12 @@ export const visaPapers: Record<DestinationId, string> = {
   linkedin: "#d3e8df",
   x: "#efddce",
 };
+export const visaAccents: Record<DestinationId, string> = {
+  portfolio: "#3d638e",
+  github: "#76518b",
+  linkedin: "#2b7658",
+  x: "#996140",
+};
 export type VisaRegion = {
   id: DestinationId;
   x: number;

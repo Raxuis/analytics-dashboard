@@ -7,7 +7,7 @@ import {
   type TravelMemory,
   type TravelCity,
 } from "./travel-content";
-import { visaPapers } from "./passport-layout";
+import { visaPapers, visaAccents } from "./passport-layout";
 import { cityMarkers, TRAVEL_MAP } from "./travel-layout";
 import {
   destinations,
@@ -196,7 +196,10 @@ export function SimplePassport({
               <a
                 key={d.id}
                 style={
-                  { "--visa-paper": visaPapers[d.id] } as React.CSSProperties
+                  {
+                    "--visa-paper": visaPapers[d.id],
+                    "--visa-accent": visaAccents[d.id],
+                  } as React.CSSProperties
                 }
                 href={d.url}
                 target="_blank"

@@ -2,7 +2,12 @@ import * as THREE from "three";
 import { identityMachineLines } from "./identity-data";
 import { TRAVEL_MAP, cityMarkers } from "./travel-layout";
 import { travelPages, countryName, type TravelMemory } from "./travel-content";
-import { PAGE_LINKS, visaPapers, type VisaRegion } from "./passport-layout";
+import {
+  PAGE_LINKS,
+  visaPapers,
+  visaAccents,
+  type VisaRegion,
+} from "./passport-layout";
 import { destinations, type DestinationId } from "./destinations";
 
 const W = 1024,
@@ -280,14 +285,9 @@ export function visaHighlight(
     c.save();
     c.translate((r.x + r.width / 2) * W, (r.y + r.height / 2) * H);
     c.rotate(r.angle);
-    c.fillStyle =
-      r.id === pressed
-        ? "#455f9e55"
-        : r.id === selected
-          ? "#49659d38"
-          : "#6074b01f";
-    c.strokeStyle =
-      r.id === selected || r.id === pressed ? "#31497ee6" : "#596faed9";
+    const accent = visaAccents[r.id];
+    c.fillStyle = `${accent}${r.id === pressed ? "40" : r.id === selected ? "2b" : "1c"}`;
+    c.strokeStyle = `${accent}${r.id === selected || r.id === pressed ? "f2" : "d9"}`;
     c.lineWidth = r.id === selected ? 5 : 3;
     stampOutline(c, r, -4);
     c.fill();

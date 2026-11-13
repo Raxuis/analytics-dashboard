@@ -792,19 +792,19 @@ p {
   gap: 16px;
   min-height: 70px;
   padding: 12px 14px;
-  border: 1px solid #89709c70;
+  border: 1px solid color-mix(in srgb, var(--visa-accent) 50%, transparent);
   border-radius: 3px;
   color: #49355f;
 }
 .simple-destinations > a:hover {
-  filter: brightness(0.96);
-  border-color: #665082;
+  background: color-mix(in srgb, var(--visa-paper) 89%, var(--visa-accent));
+  border-color: var(--visa-accent);
 }
 .simple-destinations > a:active {
-  filter: brightness(0.9);
+  background: color-mix(in srgb, var(--visa-paper) 82%, var(--visa-accent));
 }
 .simple-destinations > a:focus-visible {
-  outline-color: #594174;
+  outline-color: var(--visa-accent);
 }
 .simple-destinations strong {
   display: block;
