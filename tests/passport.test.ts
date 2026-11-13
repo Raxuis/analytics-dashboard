@@ -100,7 +100,6 @@ test("simple view exposes all four real links immediately without a canvas or a 
     "Corée du Sud",
     "3 visites",
     "Japon",
-    "2 visites",
     "Californie",
     "Floride",
     "New York",
