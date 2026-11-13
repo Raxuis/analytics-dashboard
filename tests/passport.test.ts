@@ -10,7 +10,17 @@ import {
   SHEET_WIDTH,
   SHEET_HEIGHT,
 } from "../src/components/passport/passport-layout";
-import { pageGeometry } from "../src/components/passport/passport-geometry";
+import {
+  pageGeometry,
+  coverLiningGeometry,
+  PAGE_LEVEL,
+  PAGE_BOW,
+  PAPER_THICKNESS,
+  TURN_CLEARANCE,
+  FRONT_LINING_Z,
+  OPEN_COVER_HINGE_Z,
+  REAR_COVER_HINGE_Z,
+} from "../src/components/passport/passport-geometry";
 import { turnPose } from "../src/components/passport/page-turn";
 import { SimplePassport } from "../src/components/passport/SimplePassport";
 import * as THREE from "three";
@@ -45,6 +55,12 @@ test("the page is inset from the cover and a turned sheet rests just above the l
   const transform = new THREE.Matrix4().makeRotationY(pose.angle);
   transform.setPosition(0, 0, pose.z);
   const positions = geometry.attributes.position!;
+  for (let i = 0; i < positions.count; i++)
+    positions.setZ(
+      i,
+      Math.sin((positions.getX(i) / SHEET_WIDTH) * Math.PI) * pose.bend -
+        PAPER_THICKNESS,
+    );
   for (let i = 0; i < positions.count; i++) {
     const p = new THREE.Vector3()
       .fromBufferAttribute(positions, i)
@@ -58,8 +74,13 @@ test("the page is inset from the cover and a turned sheet rests just above the l
       "turned page fits within cover height",
     );
     assert.ok(
-      p.z > 0.32 && p.z < 0.42,
-      "page rests on the lining instead of floating towards camera",
+      Math.abs(
+        p.z -
+          (PAGE_LEVEL +
+            PAGE_BOW * Math.sin((-p.x / SHEET_WIDTH) * Math.PI) +
+            TURN_CLEARANCE),
+      ) < 1e-6,
+      "turned page follows the left resting surface with only paper clearance",
     );
   }
   geometry.dispose();
@@ -149,7 +170,10 @@ test("page turn snapshots keep the outgoing front and incoming back together", a
         pose.bend <= 0.101,
         "sheet has a restrained fold rather than exposing a large gap",
       );
-      assert.ok(pose.z >= 0.19 && pose.z <= 0.356);
+      assert.ok(
+        pose.z >= PAGE_LEVEL + TURN_CLEARANCE - PAPER_THICKNESS - 1e-9 &&
+          pose.z <= PAGE_LEVEL + TURN_CLEARANCE + 1e-9,
+      );
     }
   assert.equal(swipeDirection(-100, 5), 1);
   assert.equal(swipeDirection(100, 5), -1);
@@ -203,4 +227,40 @@ test("US mainland and inset cities use their corresponding projections", async (
   assert.ok(alaska.y > TRAVEL_MAP.y + TRAVEL_MAP.height * 0.7);
   assert.ok(hawaii.y > TRAVEL_MAP.y + TRAVEL_MAP.height * 0.7);
   assert.ok(alaska.x < hawaii.x);
+});
+
+test("both resting pages have identical heights and curvature across the entire sheet", () => {
+  const left = coverLiningGeometry(),
+    right = pageGeometry();
+  const leftWorld = new THREE.Matrix4()
+    .makeTranslation(0, 0, OPEN_COVER_HINGE_Z)
+    .multiply(new THREE.Matrix4().makeRotationY(-Math.PI))
+    .multiply(
+      new THREE.Matrix4().makeTranslation(SHEET_WIDTH / 2, 0, FRONT_LINING_Z),
+    )
+    .multiply(new THREE.Matrix4().makeRotationY(Math.PI));
+  const lp = left.attributes.position!,
+    rp = right.attributes.position!;
+  assert.equal(lp.count, rp.count);
+  for (let i = 0; i < lp.count; i++) {
+    const l = new THREE.Vector3()
+      .fromBufferAttribute(lp, i)
+      .applyMatrix4(leftWorld);
+    const r = new THREE.Vector3()
+      .fromBufferAttribute(rp, i)
+      .add(new THREE.Vector3(0, 0, PAGE_LEVEL));
+    assert.ok(Math.abs(l.y - r.y) < 1e-6, "same vertical level");
+    assert.ok(Math.abs(l.z - r.z) < 1e-6, "same depth, including the bow");
+    assert.ok(
+      Math.abs(l.x + SHEET_WIDTH - r.x) < 1e-6,
+      "same dimensions on either side of the spine",
+    );
+    const rearClosedHeight = 2 * REAR_COVER_HINGE_Z - r.z;
+    assert.ok(
+      rearClosedHeight - l.z >= 2 * TURN_CLEARANCE - 1e-6,
+      "rear block still closes above the left sheet",
+    );
+  }
+  left.dispose();
+  right.dispose();
 });

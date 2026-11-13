@@ -1,3 +1,9 @@
+import {
+  PAGE_LEVEL,
+  PAGE_BOW,
+  PAPER_THICKNESS,
+  TURN_CLEARANCE,
+} from "./passport-geometry";
 export type PageTurn = {
   from: number;
   to: number;
@@ -24,8 +30,8 @@ export function turnPose(progress: number, direction: 1 | -1) {
   const t = direction === 1 ? progress : 1 - progress;
   return {
     angle: -Math.PI * t,
-    z: 0.19 + 0.165 * t,
-    bend: 0.025 + Math.sin(Math.PI * t) * 0.075,
+    z: PAGE_LEVEL + TURN_CLEARANCE - PAPER_THICKNESS * t,
+    bend: PAGE_BOW * Math.cos(Math.PI * t) + Math.sin(Math.PI * t) * 0.075,
   };
 }
 export function swipeDirection(

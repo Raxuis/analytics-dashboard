@@ -25,7 +25,18 @@ import {
   SHEET_WIDTH,
   SHEET_HEIGHT,
 } from "./passport-layout";
-import { roundedCover, pageGeometry } from "./passport-geometry";
+import {
+  roundedCover,
+  pageGeometry,
+  coverLiningGeometry,
+  PAGE_LEVEL,
+  PAPER_THICKNESS,
+  TURN_CLEARANCE,
+  FRONT_LINING_Z,
+  CLOSED_COVER_HINGE_Z,
+  OPEN_COVER_HINGE_Z,
+  REAR_COVER_HINGE_Z,
+} from "./passport-geometry";
 
 export type SceneProps = {
   open: boolean;
@@ -282,10 +293,7 @@ function Document({
   const pointer = useRef({ x: 0, y: 0 });
   const coverBody = useMemo(() => roundedCover(PW + 0.13, PH + 0.14, 0.13), []);
   const coverSurface = useMemo(() => roundedCover(PW + 0.12, PH + 0.13), []);
-  const coverLining = useMemo(
-    () => roundedCover(SHEET_WIDTH, SHEET_HEIGHT),
-    [],
-  );
+  const coverLining = useMemo(() => coverLiningGeometry(), []);
   useEffect(
     () => () => {
       coverBody.dispose();
@@ -347,6 +355,16 @@ function Document({
         invalidate();
       },
     });
+    // Both resting page surfaces share PAGE_LEVEL; the front cover lowers as it opens.
+    timeline.to(
+      cover.position,
+      {
+        z: spreadOpen || backCover ? OPEN_COVER_HINGE_Z : CLOSED_COVER_HINGE_Z,
+        duration,
+        ease: "power3.inOut",
+      },
+      0,
+    );
     // Close the right-hand page block over the left cover; never spin the whole book.
     timeline
       .to(
@@ -417,7 +435,7 @@ function Document({
       for (let i = 0; i < f.count; i++) {
         const z = Math.sin((f.getX(i) / SHEET_WIDTH) * Math.PI) * pose.bend;
         f.setZ(i, z);
-        b.setZ(i, z - 0.012);
+        b.setZ(i, z - PAPER_THICKNESS);
       }
       f.needsUpdate = true;
       b.needsUpdate = true;
@@ -572,8 +590,8 @@ function Document({
         position={[-PW / 2, 0, 0]}
         rotation={[-0.09, -0.12, -0.105]}
       >
-        <group ref={backHinge} position={[0, 0, 0.24]}>
-          <group position={[0, 0, -0.24]}>
+        <group ref={backHinge} position={[0, 0, REAR_COVER_HINGE_Z]}>
+          <group position={[0, 0, -REAR_COVER_HINGE_Z]}>
             <mesh
               position={[PW / 2, 0, -0.102]}
               castShadow
@@ -601,7 +619,7 @@ function Document({
                 />
               </mesh>
             ))}
-            <group position={[0, 0, 0.175]}>
+            <group position={[0, 0, PAGE_LEVEL]}>
               <mesh
                 geometry={stationary}
                 onClick={(e) => select(e)}
@@ -618,7 +636,7 @@ function Document({
               )}
               <UVPrint
                 active={uv && open && !turn && displayed === 0}
-                x={SHEET_WIDTH / 2}
+                geometry={stationary}
               />
             </group>
             <mesh position={[PW * 0.81, -PH / 2 - 0.15, -0.02]}>
@@ -627,7 +645,11 @@ function Document({
             </mesh>
           </group>
         </group>
-        <group ref={leaf} position={[0, 0, 0.19]} visible={!!turn}>
+        <group
+          ref={leaf}
+          position={[0, 0, PAGE_LEVEL + TURN_CLEARANCE]}
+          visible={!!turn}
+        >
           <mesh
             geometry={front}
             onClick={(e) => select(e)}
@@ -658,7 +680,7 @@ function Document({
             backFace
           />
         </group>
-        <group ref={hinge} position={[0, 0, 0.24]}>
+        <group ref={hinge} position={[0, 0, CLOSED_COVER_HINGE_Z]}>
           <mesh
             position={[PW / 2, 0, 0]}
             castShadow
@@ -710,7 +732,7 @@ function Document({
             />
           </mesh>
           <mesh
-            position={[SHEET_WIDTH / 2, 0, -0.08]}
+            position={[SHEET_WIDTH / 2, 0, FRONT_LINING_Z]}
             rotation={[0, Math.PI, 0]}
             onPointerMove={(e) => move(e, "left")}
             onPointerDown={begin}
@@ -719,10 +741,11 @@ function Document({
           >
             <primitive object={coverLining} attach="geometry" />
             <meshStandardMaterial map={face("left")} roughness={0.9} />
+            <UVPrint
+              active={uv && open && !turn && displayed === 0}
+              geometry={coverLining}
+            />
           </mesh>
-          <group position={[PW / 2, 0, -0.102]} rotation={[0, Math.PI, 0]}>
-            <UVPrint active={uv && open && !turn && displayed === 0} />
-          </group>
         </group>
         <mesh position={[0.005, 0, 0.06]}>
           <cylinderGeometry args={[0.047, 0.047, PH + 0.08, 12]} />

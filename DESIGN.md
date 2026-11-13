@@ -193,7 +193,7 @@ Links and buttons share a visible lavender outline (2px, offset 4px). The skip l
 
 ### Interior paper and visa interaction
 
-The printed interior uses an ivory document substrate, small aligned identity fields, a straight portrait, subtle guilloché and watermark, and ink visa outlines containing real destination names. No invented birth date or document number. Shared normalized visa regions drive both printing and hit testing. Hover outlines and fills the exact stamp; pointer-down strengthens the fill; selection adds a check. Blank paper has no destination. The turned leaf is inset within the cover and rests at z=0.355. The previous brown click ring is removed.
+The printed interior uses an ivory document substrate, small aligned identity fields, a straight portrait, subtle guilloché and watermark, and ink visa outlines containing real destination names. No invented birth date or document number. Shared normalized visa regions drive both printing and hit testing. Hover outlines and fills the exact stamp; pointer-down strengthens the fill; selection adds a check. Blank paper has no destination. Both paper surfaces share a base z=0.175 and a 0.025 bow. The front-cover hinge lowers on opening to align its lining with the right sheet. A turning leaf settles only 0.006 above the receiving page, with the bow reversed for its back face. The previous brown click ring is removed.
 
 ### Personal travel pages and city markers
 
@@ -214,3 +214,5 @@ Page 2 visa destinations have distinct paper tints: portfolio blue #d7e3ef, GitH
 The identity-page reading strip uses the self-hosted OCR B face (Tsukurimashou 0.3.1), two full-width rows of 44 evenly spaced optical cells, a warm clear-paper substrate and a fine top rule. Its personal-profile strings are shared between canvas and HTML in identity-data.ts; there is no invented birth date, document number or check digit. The lavender boxed footer is removed.
 
 Visa hover, press, focus and selected-check feedback follow each paper family through `visaAccents`: portfolio blue #3d638e, GitHub violet #76518b, LinkedIn green #2b7658, X warm brown #996140. The canvas stamp overlay tints its exact contour with the corresponding accent; native hover and press mix the same accent into the base paper. There is no shared blue interaction wash.
+
+The rear-cover pivot is derived from the shared page level, bow and clearance so the right block still closes above the aligned left sheet. UV overlays use the same curved geometries as their printed surfaces.

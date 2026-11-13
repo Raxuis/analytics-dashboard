@@ -1,5 +1,14 @@
 import * as THREE from "three";
 import { SHEET_WIDTH, SHEET_HEIGHT } from "./passport-layout";
+export const PAGE_LEVEL = 0.175;
+export const PAGE_BOW = 0.025;
+export const PAPER_THICKNESS = 0.012;
+export const TURN_CLEARANCE = 0.006;
+export const FRONT_LINING_Z = -0.08;
+export const CLOSED_COVER_HINGE_Z = 0.24;
+export const OPEN_COVER_HINGE_Z = PAGE_LEVEL + FRONT_LINING_Z;
+export const REAR_COVER_HINGE_Z = PAGE_LEVEL + PAGE_BOW + TURN_CLEARANCE;
+
 export function roundedCover(width: number, height: number, depth = 0) {
   const x = -width / 2,
     y = -height / 2,
@@ -60,7 +69,7 @@ export function pageGeometry(back = false) {
   const pos = g.attributes.position!;
   for (let i = 0; i < pos.count; i++) {
     const x = pos.getX(i);
-    pos.setZ(i, Math.sin((x / SHEET_WIDTH) * Math.PI) * 0.025);
+    pos.setZ(i, Math.sin((x / SHEET_WIDTH) * Math.PI) * PAGE_BOW);
   }
   if (back) {
     const uv = g.attributes.uv!;
@@ -68,4 +77,10 @@ export function pageGeometry(back = false) {
   }
   g.computeVertexNormals();
   return g;
+}
+
+export function coverLiningGeometry() {
+  const geometry = pageGeometry();
+  geometry.translate(-SHEET_WIDTH / 2, 0, 0);
+  return geometry;
 }
