@@ -276,7 +276,7 @@ test("simple UV view reveals actual stay counts and remains usable without WebGL
   );
   assert.ok(!ordinary.includes("simple-uv-memory"));
   assert.match(uv, /3 séjours/);
-  assert.match(uv, /2 séjours/);
+  assert.equal((uv.match(/3 séjours/g) ?? []).length, 2);
   assert.match(uv, /aria-pressed="true"/);
   assert.ok(!uv.includes("<canvas"));
 });

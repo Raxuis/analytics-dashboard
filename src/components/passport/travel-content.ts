@@ -59,13 +59,14 @@ export const travels: readonly TravelMemory[] = [
   },
   {
     country: "JPN",
-    visits: 2,
+    visits: 3,
     cities: [
       {
         name: "Tokyo",
         latitude: 35.6762,
         longitude: 139.6503,
         note: "Sur la côte pacifique de Honshū.",
+        uvNote: "Ma troisième fois à Tokyo, en solo.",
       },
       {
         name: "Kyoto",
@@ -113,6 +114,7 @@ export const travels: readonly TravelMemory[] = [
         latitude: 64.1466,
         longitude: -21.9426,
         note: "Capitale de l’Islande, sur la côte sud-ouest.",
+        uvNote: "En Islande, même en été, j’ai eu froid.",
       },
     ],
   },
