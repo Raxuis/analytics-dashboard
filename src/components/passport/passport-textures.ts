@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { identityMachineLines } from "./identity-data";
 import { TRAVEL_MAP, cityMarkers } from "./travel-layout";
 import { travelPages, countryName, type TravelMemory } from "./travel-content";
 import { PAGE_LINKS, visaPapers, type VisaRegion } from "./passport-layout";
@@ -45,7 +46,7 @@ function text(
   weight = 400,
 ) {
   c.fillStyle = color;
-  c.font = `${weight} ${size}px "${font}"`;
+  c.font = `${weight} ${size}px ${font === "monospace" ? "monospace" : `"${font}"`}`;
   c.textAlign = align;
   c.fillText(str, x, y);
 }
@@ -338,6 +339,7 @@ export async function loadPassportTextures(
     Promise.all([
       new FontFace("DM Sans", "url(/fonts/dm-sans.ttf)").load(),
       new FontFace("Space Grotesk", "url(/fonts/space-grotesk.ttf)").load(),
+      new FontFace("OCR B", "url(/fonts/ocr-b.ttf)").load(),
     ]).then((fonts) => {
       fonts.forEach((f) => document.fonts.add(f));
       loaded();
@@ -433,26 +435,25 @@ export async function loadPassportTextures(
   field(id.c, "Pseudonyme", "RAXUIS", 455, 608, 45);
   line(id.c, 73, 793, W - 146, "#84768e55");
   field(id.c, "Site personnel", "raphaelraclot.dev", 73, 870, 43);
-  id.c.fillStyle = "#d8cbdc75";
-  id.c.fillRect(55, 1135, W - 110, 195);
-  text(
-    id.c,
-    "RAXUIS<<RACLOT<<RAPHAEL<<<<<<<<",
-    79,
-    1215,
-    32,
-    "#242139",
-    "monospace",
-  );
-  text(
-    id.c,
-    "RAPHAELRACLOT<DEV<<<<<<<<<<<<<<",
-    79,
-    1270,
-    32,
-    "#242139",
-    "monospace",
-  );
+  // Clear reading strip, with equal optical cells and two full-width 44-character lines.
+  id.c.fillStyle = "#f4eee5";
+  id.c.fillRect(58, 1140, W - 116, 204);
+  line(id.c, 58, 1140, W - 116, "#8b7b943d");
+  const cell = (W - 148) / 44;
+  identityMachineLines.forEach((row, lineIndex) => {
+    [...row].forEach((letter, column) =>
+      text(
+        id.c,
+        letter,
+        74 + cell * (column + 0.5),
+        1222 + lineIndex * 64,
+        34,
+        "#242629",
+        "OCR B",
+        "center",
+      ),
+    );
+  });
   const visas = paper(2);
   documentHeader(visas.c, "VISAS");
   PAGE_LINKS[0]!.forEach((r) => printedVisa(visas.c, r));

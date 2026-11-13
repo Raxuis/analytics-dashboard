@@ -762,14 +762,22 @@ p {
 .simple-mrz {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   margin-top: 48px;
-  font-family: var(--font-mono);
-  font-size: clamp(9px, 1.1vw, 13px);
-  color: #4b4059;
+  font-family: var(--font-ocr), monospace;
+  font-size: clamp(8px, 1.3vw, 12px);
+  font-weight: 400;
+  line-height: 1.5;
+  color: #242629;
+  background: #f4eee5;
+  border-top: 1px solid #8b7b943d;
+  padding: 16px 0 12px;
+}
+.simple-mrz-line {
+  display: grid;
+  grid-template-columns: repeat(44, minmax(0, 1fr));
+  text-align: center;
   white-space: nowrap;
-  background: #ded1dd85;
-  padding: 15px 9px;
 }
 .simple-destinations {
   display: flex;
@@ -854,7 +862,6 @@ p {
     gap: 24px;
   }
   .simple-mrz {
-    font-size: clamp(9px, 2.9vw, 13px);
     margin-top: 26px;
   }
 }

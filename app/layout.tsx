@@ -12,6 +12,11 @@ const display = localFont({
   variable: "--font-display",
   display: "swap",
 });
+const ocr = localFont({
+  src: "../public/fonts/ocr-b.ttf",
+  variable: "--font-ocr",
+  display: "swap",
+});
 export const metadata: Metadata = {
   metadataBase: new URL("https://raxuis.vercel.app"),
   title: "Raxuis · Raphaël Raclot",
@@ -36,7 +41,9 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="fr">
-      <body className={`${sans.variable} ${display.variable}`}>{children}</body>
+      <body className={`${sans.variable} ${display.variable} ${ocr.variable}`}>
+        {children}
+      </body>
     </html>
   );
 }

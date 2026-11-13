@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element -- Native local images keep the non-WebGL document independent of the canvas loader. */
 import React, { useState } from "react";
+import { identityMachineLines } from "./identity-data";
 import {
   travelPages,
   countryName,
@@ -170,10 +171,13 @@ export function SimplePassport({
             <dd>raphaelraclot.dev</dd>
           </dl>
           <div className="simple-mrz" aria-hidden="true">
-            <span>RAXUIS&lt;&lt;RACLOT&lt;&lt;RAPHAEL&lt;&lt;&lt;&lt;</span>
-            <span>
-              RAPHAELRACLOT&lt;DEV&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;
-            </span>
+            {identityMachineLines.map((row, index) => (
+              <span className="simple-mrz-line" key={index}>
+                {[...row].map((letter, column) => (
+                  <span key={column}>{letter}</span>
+                ))}
+              </span>
+            ))}
           </div>
         </section>
         <section

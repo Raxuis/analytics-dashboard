@@ -1,0 +1,10 @@
+OCR B, Tsukurimashou Project 0.3.1
+Source: https://tsukurimashou.org/ocr.php.en
+Archive: https://tsukurimashou.org/files/ocr-0.3.1.zip
+
+From msk-ocrb10.mp:
+Copyright 1995, 2010 Norbert Schwarz
+You may freely use, modify and/or distribute this file, without limitation.
+
+TrueType conversion by Matthew Skala, who makes no copyright claim on his contributions.
+Only the OCR B font is distributed here, not OCR A.
