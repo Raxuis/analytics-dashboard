@@ -42,6 +42,7 @@ export type SceneProps = {
   open: boolean;
   page: number;
   uv: boolean;
+  uvFull: boolean;
   reduced: boolean;
   selected: DestinationId | null;
   onOpen: () => void;
@@ -55,22 +56,43 @@ export type SceneProps = {
   onReady: () => void;
   onError: () => void;
 };
-const uvVertex = `varying vec2 vUv; void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`;
-const uvFragment = `varying vec2 vUv; uniform float intensity; void main(){vec2 p=vUv-vec2(.5);float r=length(p*vec2(1.,1.4));float a=atan(p.y,p.x);float lines=pow(.5+.5*sin(r*210.+sin(a*18.)*2.5),18.);float rings=pow(.5+.5*sin(r*110.-a*8.),20.);float edge=1.-smoothstep(.22,.55,r);float alpha=(lines*.55+rings*.35)*edge*intensity;gl_FragColor=vec4(.36,.95,.78,alpha);}`;
+const uvVertex = `varying vec2 vUv; varying vec3 vWorld; void main(){vUv=uv;vec4 world=modelMatrix*vec4(position,1.);vWorld=world.xyz;gl_Position=projectionMatrix*viewMatrix*world;}`;
+const uvFragment = `varying vec2 vUv; varying vec3 vWorld; uniform float intensity; uniform float full; uniform vec3 lamp; uniform sampler2D ink; uniform float hasInk; void main(){float beam=mix(1.-smoothstep(.22,.95,distance(vWorld,lamp)),1.,full);vec4 plate=texture2D(ink,vUv);float pattern=pow(.5+.5*sin(length(vUv-.5)*210.),18.)*.4;float alpha=mix(pattern,plate.a*.85,hasInk);gl_FragColor=vec4(.28,1.,.74,(alpha+.025)*beam*intensity);}`;
 function UVPrint({
   active,
+  lamp,
+  full,
+  ink,
   x = 0,
   geometry,
   backFace = false,
 }: {
   active: boolean;
+  lamp: THREE.Vector3;
+  full: boolean;
+  ink?: THREE.Texture;
   x?: number;
   geometry?: THREE.BufferGeometry;
   backFace?: boolean;
 }) {
   const { invalidate } = useThree();
   const material = useRef<THREE.ShaderMaterial>(null);
-  const uniforms = useMemo(() => ({ intensity: { value: 0 } }), []);
+  const uniforms = useMemo(
+    () => ({
+      intensity: { value: 0 },
+      lamp: { value: lamp },
+      full: { value: 0 },
+      ink: { value: null as THREE.Texture | null },
+      hasInk: { value: 0 },
+    }),
+    [lamp],
+  );
+  useEffect(() => {
+    uniforms.full.value = full ? 1 : 0;
+    uniforms.ink.value = ink ?? null;
+    uniforms.hasInk.value = ink ? 1 : 0;
+    invalidate();
+  }, [full, ink, uniforms, invalidate]);
   useEffect(() => {
     const t = gsap.to(uniforms.intensity, {
       value: active ? 1 : 0,
@@ -155,6 +177,7 @@ function Document({
   open,
   page,
   uv,
+  uvFull,
   reduced,
   selected,
   onOpen,
@@ -170,6 +193,13 @@ function Document({
     hinge = useRef<THREE.Group>(null),
     backHinge = useRef<THREE.Group>(null),
     leaf = useRef<THREE.Group>(null);
+  const lamp = useMemo(() => new THREE.Vector3(-1, 0, 0.3), []);
+  const lampDrag = useRef<{ x: number; y: number } | null>(null);
+  const lightAt = (e: ThreeEvent<PointerEvent>) => {
+    if (!uv) return;
+    lamp.copy(e.point);
+    invalidate();
+  };
   const backCover = page === textures.spreads.length;
   const spreadOpen = open && !backCover;
   const [displayed, setDisplayed] = useState(0);
@@ -221,6 +251,16 @@ function Document({
   }, [gl, hovered, overCity, open, overBook, backCover]);
   useEffect(() => {
     const moving = (event: PointerEvent) => {
+      if (lampDrag.current) {
+        if (
+          Math.hypot(
+            event.clientX - lampDrag.current.x,
+            event.clientY - lampDrag.current.y,
+          ) > 8
+        )
+          suppressClick.current = true;
+        return;
+      }
       const start = gesture.current;
       if (!start || !open || backCover) return;
       const dx = event.clientX - start.x,
@@ -245,6 +285,10 @@ function Document({
     };
     const release = (event: PointerEvent) => {
       setPressed(null);
+      if (lampDrag.current) {
+        lampDrag.current = null;
+        return;
+      }
       const start = gesture.current;
       gesture.current = null;
       if (!start || !open) return;
@@ -269,6 +313,7 @@ function Document({
     };
     const cancel = () => {
       gesture.current = null;
+      lampDrag.current = null;
       setPressed(null);
       settleDrag.current?.(false);
     };
@@ -496,6 +541,13 @@ function Document({
       ? destinationAtUV(0, e.uv.x, e.uv.y)
       : null;
   const begin = (e: ThreeEvent<PointerEvent>) => {
+    suppressClick.current = false;
+    lightAt(e);
+    if (uv && !uvFull) {
+      lampDrag.current = { x: e.nativeEvent.clientX, y: e.nativeEvent.clientY };
+      suppressClick.current = false;
+      return;
+    }
     if (!open || turn || coverMoving.current) return;
     lastPointerType.current = e.nativeEvent.pointerType;
     cityPinned.current = false;
@@ -523,6 +575,7 @@ function Document({
     side: "left" | "right" = "right",
   ) => {
     e.stopPropagation();
+    lightAt(e);
     setOverBook(true);
     setHovered(side === "right" ? hit(e) : null);
     const city = cityHit(e, side);
@@ -536,7 +589,8 @@ function Document({
           }
         : null,
     );
-    if (!gesture.current) pointer.current = { x: e.pointer.x, y: e.pointer.y };
+    if (!gesture.current && !uv)
+      pointer.current = { x: e.pointer.x, y: e.pointer.y };
     invalidate();
   };
   const select = (
@@ -574,7 +628,8 @@ function Document({
       position={[0, 0.08, 0]}
       onPointerMove={(e) => {
         setOverBook(true);
-        if (reduced) return;
+        lightAt(e);
+        if (reduced || uv) return;
         pointer.current = { x: e.pointer.x, y: e.pointer.y };
         invalidate();
       }}
@@ -598,6 +653,7 @@ function Document({
               receiveShadow
               onClick={(e) => {
                 e.stopPropagation();
+                if (suppressClick.current) return;
                 if (backCover) onTurn(textures.spreads.length - 1);
                 else if (!open) onOpen();
               }}
@@ -635,8 +691,11 @@ function Document({
                 <VisaOverlay geometry={stationary} map={highlight} />
               )}
               <UVPrint
-                active={uv && open && !turn && displayed === 0}
+                active={uv && spreadOpen && !turn}
                 geometry={stationary}
+                lamp={lamp}
+                full={uvFull}
+                ink={textures.uvSpreads[displayed]?.right}
               />
             </group>
             <mesh position={[PW * 0.81, -PH / 2 - 0.15, -0.02]}>
@@ -670,15 +729,6 @@ function Document({
               roughness={0.85}
             />
           </mesh>
-          <UVPrint
-            active={uv && open && !turn && displayed === 0}
-            geometry={front}
-          />
-          <UVPrint
-            active={uv && open && !turn && displayed === 0}
-            geometry={back}
-            backFace
-          />
         </group>
         <group ref={hinge} position={[0, 0, CLOSED_COVER_HINGE_Z]}>
           <mesh
@@ -687,6 +737,7 @@ function Document({
             receiveShadow
             onClick={(e) => {
               e.stopPropagation();
+              if (suppressClick.current) return;
               if (backCover) onTurn(textures.spreads.length - 1);
               else onOpen();
             }}
@@ -703,6 +754,7 @@ function Document({
             position={[PW / 2, 0, 0.078]}
             onClick={(e) => {
               e.stopPropagation();
+              if (suppressClick.current) return;
               if (backCover) onTurn(textures.spreads.length - 1);
               else onOpen();
             }}
@@ -716,7 +768,7 @@ function Document({
             />
           </mesh>
           <group position={[PW / 2, 0, 0.08]}>
-            <UVPrint active={uv && !open} />
+            <UVPrint active={uv && !open} lamp={lamp} full={uvFull} />
           </group>
           <mesh position={[PW / 2, 0, 0.083]}>
             <planeGeometry args={[PW + 0.12, PH + 0.13]} />
@@ -742,8 +794,11 @@ function Document({
             <primitive object={coverLining} attach="geometry" />
             <meshStandardMaterial map={face("left")} roughness={0.9} />
             <UVPrint
-              active={uv && open && !turn && displayed === 0}
+              active={uv && spreadOpen && !turn}
               geometry={coverLining}
+              lamp={lamp}
+              full={uvFull}
+              ink={textures.uvSpreads[displayed]?.left}
             />
           </mesh>
         </group>

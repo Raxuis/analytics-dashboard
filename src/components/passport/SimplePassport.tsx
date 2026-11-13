@@ -17,14 +17,18 @@ import {
 
 type Props = {
   error?: boolean;
+  uv?: boolean;
+  onUv?: () => void;
   onInteractive?: () => void;
   onTrack?: (id: DestinationId) => void;
 };
 function TravelPage({
   memory,
   index,
+  uv,
 }: {
   memory: TravelMemory;
+  uv: boolean;
   index: number;
 }) {
   const [selected, setSelected] = useState<TravelCity | null>(null);
@@ -67,7 +71,15 @@ function TravelPage({
             >
               <strong>{marker.city.name}</strong>
               <small>{marker.country}</small>
-              {marker.city.note && <span>{marker.city.note}</span>}
+              {(uv && marker.city.uvNote
+                ? marker.city.uvNote
+                : marker.city.note) && (
+                <span>
+                  {uv && marker.city.uvNote
+                    ? marker.city.uvNote
+                    : marker.city.note}
+                </span>
+              )}
             </span>
           </button>
         ))}
@@ -101,10 +113,23 @@ function TravelPage({
         {selected && (
           <>
             <strong>{selected.name}</strong>
-            <p>{selected.note ?? countryName(memory.country)}</p>
+            <p>
+              {(uv && selected.uvNote ? selected.uvNote : selected.note) ??
+                countryName(memory.country)}
+            </p>
           </>
         )}
       </div>
+      {uv && (
+        <div className="simple-uv-memory">
+          <strong>
+            {memory.visits
+              ? `${memory.visits} ${memory.visits === 1 ? "séjour" : "séjours"}`
+              : "Visité"}
+          </strong>
+          {memory.uvNote && <p>{memory.uvNote}</p>}
+        </div>
+      )}
       <div className="simple-travel-sticker">
         <h3>{countryName(memory.country)}</h3>
         <p>
@@ -122,11 +147,18 @@ function TravelPage({
 
 export function SimplePassport({
   error = false,
+  uv = false,
+  onUv,
   onInteractive,
   onTrack,
 }: Props) {
   return (
     <div className="simple-view-document">
+      {onUv && (
+        <button className="simple-uv-toggle" aria-pressed={uv} onClick={onUv}>
+          Lumière UV
+        </button>
+      )}
       {error && (
         <p className="simple-error" role="status">
           La vue 3D est indisponible. Les liens restent accessibles ci-dessous.
@@ -228,6 +260,7 @@ export function SimplePassport({
           <TravelPage
             key={`${page.memory.country}-${index}`}
             memory={page.memory}
+            uv={uv}
             index={index}
           />
         ))}

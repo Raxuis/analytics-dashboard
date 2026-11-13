@@ -1032,3 +1032,35 @@ p {
 .city-detail p {
   margin: 4px 0 0;
 }
+
+/* UV remains a quiet inspection tool beside the page controls. */
+.document-controls {
+  max-width: calc(100vw - 24px);
+  flex-wrap: wrap;
+  justify-content: center;
+  width: max-content;
+}
+.document-controls .uv-scope {
+  color: #e2d5ff;
+  white-space: nowrap;
+}
+.simple-uv-toggle {
+  display: block;
+  margin: 0 auto 20px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 8px;
+  color: #e2d5ff;
+  background: #3b334d;
+}
+.simple-uv-toggle[aria-pressed="true"] {
+  background: #56446e;
+}
+.simple-uv-memory {
+  color: #593c77;
+  padding: 12px 0;
+  font-size: 14px;
+}
+.simple-uv-memory strong {
+  font-weight: 600;
+}

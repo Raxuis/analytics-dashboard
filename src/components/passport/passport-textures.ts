@@ -22,6 +22,7 @@ export type PassportTextures = {
   identity: THREE.CanvasTexture;
   visas: THREE.CanvasTexture;
   spreads: { left: THREE.CanvasTexture; right: THREE.CanvasTexture }[];
+  uvSpreads: { left: THREE.CanvasTexture; right: THREE.CanvasTexture }[];
   environment: THREE.CanvasTexture;
   dispose: () => void;
 };
@@ -504,6 +505,85 @@ export async function loadPassportTextures(
       left: travelSheets[i]!,
       right: travelSheets[i + 1] ?? texture(paper(i + 4).el),
     });
+  // A separate transparent ink plate keeps memories invisible under ordinary light.
+  const uvSheets = [
+    undefined,
+    undefined,
+    ...travelPages.map((p) => p.memory),
+  ].map((memory) => {
+    const sheet = canvas();
+    const c = sheet.c;
+    c.strokeStyle = "#79ffd5";
+    c.lineWidth = 1.2;
+    c.globalAlpha = 0.45;
+    for (let i = 0; i < 20; i++) {
+      c.beginPath();
+      for (let x = 65; x < 960; x += 4) {
+        const y = 210 + i * 42 + Math.sin(x / 85 + i * 0.18) * 25;
+        if (x === 65) c.moveTo(x, y);
+        else c.lineTo(x, y);
+      }
+      c.stroke();
+    }
+    c.globalAlpha = 1;
+    if (memory) {
+      const label = memory.visits
+        ? `${memory.visits} ${memory.visits === 1 ? "séjour" : "séjours"}`
+        : "Visité";
+      c.clearRect(60, 1080, 900, 350);
+      text(
+        c,
+        label.toLocaleUpperCase("fr"),
+        90,
+        1390,
+        34,
+        "#79ffd5",
+        "DM Sans",
+        "left",
+        600,
+      );
+      const marks = Math.min(20, memory.visits ?? 0);
+      for (let i = 0; i < marks; i++) {
+        c.strokeRect(
+          650 + (i % 10) * 24,
+          1360 + Math.floor(i / 10) * 24,
+          12,
+          18,
+        );
+      }
+      for (const marker of cityMarkers(memory)) {
+        c.fillStyle = "#79ffd5";
+        c.beginPath();
+        c.arc(marker.x, marker.y, 9, 0, Math.PI * 2);
+        c.fill();
+        if (marker.city.uvNote) {
+          c.beginPath();
+          c.arc(marker.x, marker.y, 32, 0, Math.PI * 2);
+          c.stroke();
+        }
+      }
+      if (memory.uvNote) {
+        c.font = '24px "DM Sans"';
+        const words = memory.uvNote.split(/\s+/);
+        let row = "",
+          y = 960;
+        for (const word of words) {
+          if (c.measureText(`${row} ${word}`).width > 820 && row) {
+            text(c, row, 90, y, 24, "#79ffd5");
+            row = word;
+            y += 30;
+            if (y > 1050) break;
+          } else row = row ? `${row} ${word}` : word;
+        }
+        if (y <= 1050) text(c, row, 90, y, 24, "#79ffd5");
+      }
+    }
+    return texture(sheet.el, false);
+  });
+  const uvSpreads = spreads.map((_, i) => ({
+    left: uvSheets[i * 2]!,
+    right: uvSheets[i * 2 + 1] ?? texture(canvas().el, false),
+  }));
   const env = canvas(512, 256);
   const eg = env.c.createLinearGradient(0, 0, 0, 256);
   eg.addColorStop(0, "#1d2a39");
@@ -531,10 +611,12 @@ export async function loadPassportTextures(
   return {
     ...all,
     spreads,
+    uvSpreads,
     dispose: () =>
       new Set([
         ...Object.values(all),
         ...spreads.flatMap((s) => [s.left, s.right]),
+        ...uvSpreads.flatMap((s) => [s.left, s.right]),
       ]).forEach((t) => t.dispose()),
   };
 }

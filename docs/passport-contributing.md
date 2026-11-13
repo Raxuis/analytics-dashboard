@@ -57,3 +57,11 @@ La précision des contours est adaptée à une page de passeport, pas à une car
 Les États-Unis utilisent trois projections coordonnées : continent, Alaska et Hawaï. Une ville ajoutée en Alaska ou à Hawaï sera placée dans le bon encart automatiquement.
 
 La liste des villes sous chaque carte conserve une seule ligne et défile horizontalement si nécessaire. Tu peux donc ajouter des villes sans modifier la mise en page. Chaque nom reste accessible au clavier et au toucher.
+
+### Souvenirs sous lumière UV
+
+Ajoute `uvNote: "Ton souvenir réel en une phrase."` à une ville pour remplacer sa description au survol quand l’UV est actif. Le champ `note` reste la description en lumière normale. Une ville avec `uvNote` porte un cercle fluorescent supplémentaire pour signaler le souvenir.
+
+Le même champ `uvNote` sur un pays imprime une courte note cachée sur sa carte. Garde cette note à trois lignes environ. Les marques fluorescentes de séjour viennent automatiquement de `visits`. Sans nombre fourni, la page indique seulement « Visité ».
+
+En 3D, active **UV**, puis déplace la souris ou glisse le doigt sur le papier. Ce glissement sert à la lampe ; les boutons restent disponibles pour tourner les pages. **Tout éclairer** révèle la double page entière et rétablit le glissement des pages. **Lampe** revient à l’éclairage local. En vue simple, **Lumière UV** révèle directement les souvenirs avec les mêmes boutons de villes accessibles au clavier.

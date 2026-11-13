@@ -116,8 +116,9 @@ test("simple view exposes all four real links immediately without a canvas or a 
 });
 
 test("country catalog has a prepared silhouette for every code", async () => {
-  const { default: catalog } =
-    await import("../src/components/passport/country-catalog.json");
+  const { default: catalog } = await import(
+    "../src/components/passport/country-catalog.json"
+  );
   const { access } = await import("node:fs/promises");
   assert.ok(Object.keys(catalog).length >= 170);
   await Promise.all(
@@ -133,8 +134,9 @@ test("country catalog has a prepared silhouette for every code", async () => {
 
 test("every supplied city projects onto its country and can be targeted", async () => {
   const { travels } = await import("../src/components/passport/travel-content");
-  const { cityMarkers, cityAtUV } =
-    await import("../src/components/passport/travel-layout");
+  const { cityMarkers, cityAtUV } = await import(
+    "../src/components/passport/travel-layout"
+  );
   for (const memory of travels)
     for (const marker of cityMarkers(memory)) {
       assert.ok(
@@ -149,8 +151,9 @@ test("every supplied city projects onto its country and can be targeted", async 
 });
 
 test("page turn snapshots keep the outgoing front and incoming back together", async () => {
-  const { turnFaces, turnPose, swipeDirection } =
-    await import("../src/components/passport/page-turn");
+  const { turnFaces, turnPose, swipeDirection } = await import(
+    "../src/components/passport/page-turn"
+  );
   assert.deepEqual(turnFaces({ from: 0, to: 1, direction: 1 }), {
     left: [0, "left"],
     right: [1, "right"],
@@ -201,8 +204,9 @@ test("a completed swipe does not replay when its parent still has the old page",
 });
 
 test("US mainland and inset cities use their corresponding projections", async () => {
-  const { projectCity, TRAVEL_MAP } =
-    await import("../src/components/passport/travel-layout");
+  const { projectCity, TRAVEL_MAP } = await import(
+    "../src/components/passport/travel-layout"
+  );
   const ny = projectCity("USA", {
     name: "New York",
     latitude: 40.7128,
@@ -263,4 +267,16 @@ test("both resting pages have identical heights and curvature across the entire 
   }
   left.dispose();
   right.dispose();
+});
+
+test("simple UV view reveals actual stay counts and remains usable without WebGL", () => {
+  const ordinary = renderToStaticMarkup(React.createElement(SimplePassport));
+  const uv = renderToStaticMarkup(
+    React.createElement(SimplePassport, { uv: true, onUv: () => {} }),
+  );
+  assert.ok(!ordinary.includes("simple-uv-memory"));
+  assert.match(uv, /3 séjours/);
+  assert.match(uv, /2 séjours/);
+  assert.match(uv, /aria-pressed="true"/);
+  assert.ok(!uv.includes("<canvas"));
 });

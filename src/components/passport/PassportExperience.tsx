@@ -74,6 +74,7 @@ export default function PassportExperience() {
   const [reduced, setReduced] = useState(false),
     [mounted, setMounted] = useState(false),
     [simpleMode, setSimpleMode] = useState(false);
+  const [uvFull, setUvFull] = useState(false);
   const [turning, setTurning] = useState(false);
   const [city, setCity] = useState<
     (CityMarker & { clientX: number; clientY: number }) | null
@@ -223,6 +224,7 @@ export default function PassportExperience() {
                 open={open}
                 page={page}
                 uv={uv}
+                uvFull={uvFull}
                 reduced={reduced}
                 selected={selected}
                 onOpen={onOpen}
@@ -251,7 +253,12 @@ export default function PassportExperience() {
           </div>
         )}
         {(simpleMode || failed) && (
-          <SimplePassport error={failed} onInteractive={simple} />
+          <SimplePassport
+            error={failed}
+            onInteractive={simple}
+            uv={uv}
+            onUv={() => setUv((v) => !v)}
+          />
         )}
       </section>
       {ready && !failed && !simpleMode && (
@@ -269,6 +276,18 @@ export default function PassportExperience() {
             <Scan size={17} />
             <span>UV</span>
           </button>
+          {uv && (
+            <button
+              className="uv-scope"
+              aria-pressed={uvFull}
+              onClick={() => setUvFull((v) => !v)}
+              title={
+                uvFull ? "Revenir à la lampe mobile" : "Révéler toute la page"
+              }
+            >
+              {uvFull ? "Lampe" : "Tout éclairer"}
+            </button>
+          )}
           {open ? (
             <>
               <button
@@ -407,7 +426,9 @@ export default function PassportExperience() {
         >
           <strong>{city.city.name}</strong>
           <small>{city.country}</small>
-          {city.city.note && <p>{city.city.note}</p>}
+          {(uv && city.city.uvNote ? city.city.uvNote : city.city.note) && (
+            <p>{uv && city.city.uvNote ? city.city.uvNote : city.city.note}</p>
+          )}
         </aside>
       )}
       <div className="sr-only" aria-live="polite">

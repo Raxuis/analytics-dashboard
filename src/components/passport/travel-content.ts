@@ -7,17 +7,20 @@ export type TravelCity = {
   longitude: number;
   /** One short sentence shown on hover, keyboard focus or touch. */
   note?: string;
+  /** Personal memory revealed only in UV. */
+  uvNote?: string;
 };
 export type TravelMemory = {
   /** Prepared silhouette identifier. See docs/passport-contributing.md. */
   country: CountryCode;
   visits?: number;
+  uvNote?: string;
   places?: readonly string[];
   cities?: readonly TravelCity[];
 };
 
 /** Edit here. Each country becomes a page automatically, in this order. */
-export const travels = [
+export const travels: readonly TravelMemory[] = [
   {
     country: "KOR",
     visits: 3,
@@ -113,7 +116,7 @@ export const travels = [
       },
     ],
   },
-] satisfies readonly TravelMemory[];
+];
 
 export const countryName = (code: CountryCode) => countries[code].name;
 export const travelPages = travels.map((memory) => ({

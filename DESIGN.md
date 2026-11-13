@@ -216,3 +216,9 @@ The identity-page reading strip uses the self-hosted OCR B face (Tsukurimashou 0
 Visa hover, press, focus and selected-check feedback follow each paper family through `visaAccents`: portfolio blue #3d638e, GitHub violet #76518b, LinkedIn green #2b7658, X warm brown #996140. The canvas stamp overlay tints its exact contour with the corresponding accent; native hover and press mix the same accent into the base paper. There is no shared blue interaction wash.
 
 The rear-cover pivot is derived from the shared page level, bow and clearance so the right block still closes above the aligned left sheet. UV overlays use the same curved geometries as their printed surfaces.
+
+### Inspection UV
+
+L’UV utilise une encre transparente séparée des textures imprimées. Un faisceau à bord doux suit le pointeur sur le papier sans boucle d’animation permanente. Les lignes fluorescentes restent fines. Les marques de séjour apparaissent dans la marge inférieure, sans recouvrir la vignette imprimée. Les comptes viennent des données de voyage et aucune anecdote n’est inventée. Les souvenirs `uvNote` sont facultatifs.
+
+Le bouton « Tout éclairer » assure un accès sans déplacement précis du pointeur. En mode lampe, glisser éclaire et les boutons tournent les pages. La vue simple offre une révélation directe des mêmes souvenirs.
