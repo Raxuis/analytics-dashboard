@@ -290,3 +290,45 @@ test("swipes traverse both covers without treating the front cover as a printed 
   assert.equal(swipeTarget(3, 1, 3), null);
   assert.equal(swipeTarget(0, 0, 3), null);
 });
+
+test("cover drag endpoints match the resting poses and reverse continuously", async () => {
+  const { coverPose, shouldCompleteDrag } = await import(
+    "../src/components/passport/cover-motion"
+  );
+  const start = coverPose("front-close", 0),
+    closed = coverPose("front-close", 1);
+  assert.equal(start.frontAngle, -Math.PI);
+  assert.equal(start.frontZ, OPEN_COVER_HINGE_Z);
+  assert.ok(Math.abs(closed.frontAngle) < 1e-9);
+  assert.equal(closed.frontZ, 0.24);
+  assert.equal(closed.bookX, -PAGE_WIDTH / 2);
+  assert.deepEqual(coverPose("rear-close", 0.25), coverPose("rear-open", 0.75));
+  assert.equal(coverPose("rear-close", 1).rearAngle, -Math.PI);
+  assert.equal(coverPose("rear-open", 1).openness, 1);
+  assert.deepEqual(coverPose("front-close", -1), start);
+  assert.deepEqual(coverPose("front-close", 2), closed);
+  assert.equal(shouldCompleteDrag(0.2, 1), true);
+  assert.equal(shouldCompleteDrag(0.2, -1), false);
+  assert.equal(shouldCompleteDrag(0.05, 2), false);
+  assert.equal(shouldCompleteDrag(0.7, 0), true);
+});
+
+test("full-screen reader exposes only the requested printed page", () => {
+  const identity = renderToStaticMarkup(
+    React.createElement(SimplePassport, { pageIndex: 0 }),
+  );
+  const visas = renderToStaticMarkup(
+    React.createElement(SimplePassport, { pageIndex: 1 }),
+  );
+  const japan = renderToStaticMarkup(
+    React.createElement(SimplePassport, { pageIndex: 3 }),
+  );
+  assert.ok(identity.includes("simple-identity"));
+  assert.ok(!identity.includes("simple-visas"));
+  assert.ok(!identity.includes("simple-travel"));
+  assert.equal((visas.match(/<a /g) ?? []).length, 4);
+  assert.ok(!visas.includes("simple-identity"));
+  assert.ok(japan.includes("Japon"));
+  assert.ok(!japan.includes("Corée du Sud"));
+  assert.ok(!japan.includes("États-Unis"));
+});

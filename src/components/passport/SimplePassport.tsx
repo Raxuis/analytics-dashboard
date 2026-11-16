@@ -17,6 +17,8 @@ import {
 
 type Props = {
   error?: boolean;
+  /** Restrict the native document to one printed page for the full-screen reader. */
+  pageIndex?: number;
   uv?: boolean;
   onUv?: () => void;
   onInteractive?: () => void;
@@ -141,12 +143,16 @@ function TravelPage({
           <p className="memory-places">{memory.places.join(", ")}</p>
         )}
       </div>
+      <span className="simple-page-folio" aria-hidden="true">
+        {String(index + 3).padStart(2, "0")}
+      </span>
     </section>
   );
 }
 
 export function SimplePassport({
   error = false,
+  pageIndex,
   uv = false,
   onUv,
   onInteractive,
@@ -168,102 +174,114 @@ export function SimplePassport({
         className="simple-passport"
         aria-label="Passeport personnel de Raphaël Raclot"
       >
-        <section
-          className="simple-page simple-identity"
-          aria-labelledby="simple-identity-title"
-        >
-          <div className="simple-page-header">
-            <h2 id="simple-identity-title">Passeport personnel</h2>
-            <span>Identité</span>
-          </div>
-          <div className="simple-biodata">
-            <img
-              src="/avatar.jpg"
-              alt="Raphaël Raclot"
-              width="116"
-              height="153"
-            />
-            <dl>
-              <div>
-                <dt>Nom</dt>
-                <dd>RACLOT</dd>
-              </div>
-              <div>
-                <dt>Prénom</dt>
-                <dd>RAPHAËL</dd>
-              </div>
-              <div>
-                <dt>Pseudonyme</dt>
-                <dd>RAXUIS</dd>
-              </div>
-            </dl>
-          </div>
-          <dl className="simple-site">
-            <dt>Site</dt>
-            <dd>raphaelraclot.dev</dd>
-          </dl>
-          <div className="simple-mrz" aria-hidden="true">
-            {identityMachineLines.map((row, index) => (
-              <span className="simple-mrz-line" key={index}>
-                {[...row].map((letter, column) => (
-                  <span key={column}>{letter}</span>
-                ))}
-              </span>
-            ))}
-          </div>
-        </section>
-        <section
-          className="simple-page simple-visas"
-          aria-labelledby="simple-visas-title"
-        >
-          <div className="simple-page-header">
-            <h2 id="simple-visas-title">Visas</h2>
-            <span>Raxuis</span>
-          </div>
-          <nav
-            className="simple-destinations"
-            aria-label="Destinations du passeport"
+        {(pageIndex === undefined || pageIndex === 0) && (
+          <section
+            className="simple-page simple-identity"
+            aria-labelledby="simple-identity-title"
           >
-            {destinations.map((d) => (
-              <a
-                key={d.id}
-                style={
-                  {
-                    "--visa-paper": visaPapers[d.id],
-                    "--visa-accent": visaAccents[d.id],
-                  } as React.CSSProperties
-                }
-                href={d.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() =>
-                  onTrack ? onTrack(d.id) : trackDestination(d.id, "direct")
-                }
-              >
-                <span>
-                  <strong>{d.label}</strong>
-                  <small>
-                    {d.id === "github"
-                      ? "github.com/Raxuis"
-                      : d.id === "linkedin"
-                        ? "Raphaël Raclot"
-                        : d.id === "x"
-                          ? "@I_Haruki_I"
-                          : d.domain}
-                  </small>
+            <div className="simple-page-header">
+              <h2 id="simple-identity-title">Passeport personnel</h2>
+              <span>Identité</span>
+            </div>
+            <div className="simple-biodata">
+              <img
+                src="/avatar.jpg"
+                alt="Raphaël Raclot"
+                width="116"
+                height="153"
+              />
+              <dl>
+                <div>
+                  <dt>Nom</dt>
+                  <dd>RACLOT</dd>
+                </div>
+                <div>
+                  <dt>Prénom</dt>
+                  <dd>RAPHAËL</dd>
+                </div>
+                <div>
+                  <dt>Pseudonyme</dt>
+                  <dd>RAXUIS</dd>
+                </div>
+              </dl>
+            </div>
+            <dl className="simple-site">
+              <dt>Site</dt>
+              <dd>raphaelraclot.dev</dd>
+            </dl>
+            <div className="simple-mrz" aria-hidden="true">
+              {identityMachineLines.map((row, index) => (
+                <span className="simple-mrz-line" key={index}>
+                  {[...row].map((letter, column) => (
+                    <span key={column}>{letter}</span>
+                  ))}
                 </span>
-              </a>
-            ))}
-          </nav>
-        </section>
-        {travelPages.map((page, index) => (
-          <TravelPage
-            key={`${page.memory.country}-${index}`}
-            memory={page.memory}
-            uv={uv}
-            index={index}
-          />
-        ))}
+              ))}
+            </div>
+            <span className="simple-page-folio" aria-hidden="true">
+              01
+            </span>
+          </section>
+        )}
+        {(pageIndex === undefined || pageIndex === 1) && (
+          <section
+            className="simple-page simple-visas"
+            aria-labelledby="simple-visas-title"
+          >
+            <div className="simple-page-header">
+              <h2 id="simple-visas-title">Visas</h2>
+              <span>Raxuis</span>
+            </div>
+            <nav
+              className="simple-destinations"
+              aria-label="Destinations du passeport"
+            >
+              {destinations.map((d) => (
+                <a
+                  key={d.id}
+                  style={
+                    {
+                      "--visa-paper": visaPapers[d.id],
+                      "--visa-accent": visaAccents[d.id],
+                    } as React.CSSProperties
+                  }
+                  href={d.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() =>
+                    onTrack ? onTrack(d.id) : trackDestination(d.id, "direct")
+                  }
+                >
+                  <span>
+                    <strong>{d.label}</strong>
+                    <small>
+                      {d.id === "github"
+                        ? "github.com/Raxuis"
+                        : d.id === "linkedin"
+                          ? "Raphaël Raclot"
+                          : d.id === "x"
+                            ? "@I_Haruki_I"
+                            : d.domain}
+                    </small>
+                  </span>
+                </a>
+              ))}
+            </nav>
+            <span className="simple-page-folio" aria-hidden="true">
+              02
+            </span>
+          </section>
+        )}
+        {travelPages.map((page, index) =>
+          pageIndex === undefined || pageIndex === index + 2 ? (
+            <TravelPage
+              key={`${page.memory.country}-${index}`}
+              memory={page.memory}
+              uv={uv}
+              index={index}
+            />
+          ) : null,
+        )}
       </div>
       {onInteractive && (
         <button className="simple-return" onClick={onInteractive}>

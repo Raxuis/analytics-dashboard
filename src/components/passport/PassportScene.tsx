@@ -18,6 +18,7 @@ import {
   swipeTarget,
   type PageTurn,
 } from "./page-turn";
+import { coverPose, shouldCompleteDrag, type CoverMove } from "./cover-motion";
 import type { DestinationId } from "./destinations";
 import {
   destinationAtUV,
@@ -214,6 +215,10 @@ function Document({
     y: number;
     time: number;
     direction?: 1 | -1;
+    cover?: CoverMove;
+    lastX: number;
+    lastTime: number;
+    velocity: number;
   } | null>(null);
   const dragValue = useRef(0);
   const applyDrag = useRef<((value: number) => void) | null>(null);
@@ -235,6 +240,70 @@ function Document({
   const [pressed, setPressed] = useState<DestinationId | null>(null);
   const [overBook, setOverBook] = useState(false);
   const coverMoving = useRef(false);
+  const coverAcknowledged = useRef(false);
+  const coverInitialized = useRef(false);
+  const coverSettlement = useRef<gsap.core.Tween | null>(null);
+  const applyCoverPose = useCallback(
+    (move: CoverMove, progress: number) => {
+      const pose = coverPose(move, progress);
+      if (!hinge.current || !backHinge.current || !book.current) return;
+      hinge.current.rotation.y = pose.frontAngle;
+      hinge.current.position.z = pose.frontZ;
+      backHinge.current.rotation.y = pose.rearAngle;
+      book.current.position.x = pose.bookX;
+      camera.position.z = Math.max(
+        9.2,
+        (4 + pose.openness * 2.8) /
+          (2 * Math.tan((19 * Math.PI) / 180) * (size.width / size.height)),
+      );
+      invalidate();
+    },
+    [camera, size.width, size.height, invalidate],
+  );
+  const settleCover = useCallback(
+    (move: CoverMove, complete: boolean) => {
+      const progress = { value: dragValue.current };
+      coverSettlement.current?.kill();
+      coverSettlement.current = gsap.to(progress, {
+        value: complete ? 1 : 0,
+        duration: reduced ? 0 : 0.38,
+        ease: "power2.inOut",
+        onUpdate: () => applyCoverPose(move, progress.value),
+        onComplete: () => {
+          applyCoverPose(move, complete ? 1 : 0);
+          coverMoving.current = false;
+          coverSettlement.current = null;
+          onBusy(false);
+          if (complete) {
+            coverAcknowledged.current = true;
+            if (move === "front-close") onClose();
+            else
+              onTurn(
+                move === "rear-close"
+                  ? textures.spreads.length
+                  : textures.spreads.length - 1,
+              );
+          }
+          invalidate();
+        },
+      });
+    },
+    [
+      applyCoverPose,
+      reduced,
+      onBusy,
+      onClose,
+      onTurn,
+      textures.spreads.length,
+      invalidate,
+    ],
+  );
+  useEffect(
+    () => () => {
+      coverSettlement.current?.kill();
+    },
+    [],
+  );
   const highlight = useMemo(
     () => visaHighlight(displayed, hovered, selected, pressed),
     [displayed, hovered, selected, pressed],
@@ -265,16 +334,40 @@ function Document({
         return;
       }
       const start = gesture.current;
-      if (!start || !open || backCover) return;
+      if (!start || !open) return;
       const dx = event.clientX - start.x,
         dy = event.clientY - start.y;
       if (Math.hypot(dx, dy) > 8) suppressClick.current = true;
       if (!start.direction && !turn) {
-        const direction = swipeDirection(dx, dy, 10),
-          next = displayed + direction;
-        if (direction && next >= 0 && next < textures.spreads.length) {
+        const direction = swipeDirection(dx, dy, 10);
+        const current = backCover ? textures.spreads.length : displayed;
+        const target = swipeTarget(current, direction, textures.spreads.length);
+        if (direction && target !== null) {
           start.direction = direction;
-          setTurn({ from: displayed, to: next, direction, interactive: true });
+          if (
+            target === "front-cover" ||
+            target === textures.spreads.length ||
+            backCover
+          ) {
+            start.cover =
+              target === "front-cover"
+                ? "front-close"
+                : backCover
+                  ? "rear-open"
+                  : "rear-close";
+            coverMoving.current = true;
+            gsap.killTweensOf(camera.position);
+            onBusy(true);
+            setHovered(null);
+            setPressed(null);
+            onCity(null);
+          } else
+            setTurn({
+              from: displayed,
+              to: target,
+              direction,
+              interactive: true,
+            });
         }
       }
       if (start.direction) {
@@ -283,7 +376,14 @@ function Document({
           0,
           1,
         );
-        applyDrag.current?.(dragValue.current);
+        const now = performance.now();
+        start.velocity =
+          (-(event.clientX - start.lastX) * start.direction) /
+          Math.max(1, now - start.lastTime);
+        start.lastX = event.clientX;
+        start.lastTime = now;
+        if (start.cover) applyCoverPose(start.cover, dragValue.current);
+        else applyDrag.current?.(dragValue.current);
       }
     };
     const release = (event: PointerEvent) => {
@@ -299,11 +399,11 @@ function Document({
         dy = event.clientY - start.y;
       suppressClick.current = Math.hypot(dx, dy) > 8;
       if (start.direction) {
-        const speed =
-          Math.abs(dx) / Math.max(1, performance.now() - start.time);
-        const complete =
-          dragValue.current > 0.25 || (Math.abs(dx) > 45 && speed > 0.4);
-        if (settleDrag.current) settleDrag.current(complete);
+        const velocity =
+          performance.now() - start.lastTime < 100 ? start.velocity : 0;
+        const complete = shouldCompleteDrag(dragValue.current, velocity);
+        if (start.cover) settleCover(start.cover, complete);
+        else if (settleDrag.current) settleDrag.current(complete);
         else settleRequest.current = complete;
       } else if (!turn) {
         const direction = swipeDirection(dx, dy);
@@ -318,7 +418,9 @@ function Document({
       gl.domElement.style.cursor = "auto";
     };
     const cancel = () => {
+      const start = gesture.current;
       gesture.current = null;
+      if (start?.cover) settleCover(start.cover, false);
       lampDrag.current = null;
       setPressed(null);
       settleDrag.current?.(false);
@@ -326,10 +428,12 @@ function Document({
     window.addEventListener("pointermove", moving);
     window.addEventListener("pointerup", release);
     window.addEventListener("pointercancel", cancel);
+    window.addEventListener("blur", cancel);
     return () => {
       window.removeEventListener("pointermove", moving);
       window.removeEventListener("pointerup", release);
       window.removeEventListener("pointercancel", cancel);
+      window.removeEventListener("blur", cancel);
     };
   }, [
     open,
@@ -341,18 +445,40 @@ function Document({
     gl,
     size.width,
     backCover,
+    applyCoverPose,
+    settleCover,
+    camera,
+    onBusy,
+    onCity,
   ]);
   const pointer = useRef({ x: 0, y: 0 });
   const coverBody = useMemo(() => roundedCover(PW + 0.13, PH + 0.14, 0.13), []);
   const coverSurface = useMemo(() => roundedCover(PW + 0.12, PH + 0.13), []);
   const coverLining = useMemo(() => coverLiningGeometry(), []);
+  const stitching = useMemo(() => {
+    const vertices: number[] = [];
+    for (let y = -PH * 0.39; y < PH * 0.4; y += 0.18)
+      vertices.push(
+        -0.016,
+        y,
+        PAGE_LEVEL + 0.006,
+        0.016,
+        y + 0.045,
+        PAGE_LEVEL + 0.006,
+      );
+    return new THREE.BufferGeometry().setAttribute(
+      "position",
+      new THREE.Float32BufferAttribute(vertices, 3),
+    );
+  }, []);
   useEffect(
     () => () => {
       coverBody.dispose();
       coverSurface.dispose();
       coverLining.dispose();
+      stitching.dispose();
     },
-    [coverBody, coverSurface, coverLining],
+    [coverBody, coverSurface, coverLining, stitching],
   );
   const front = useMemo(() => pageGeometry(), []),
     back = useMemo(() => pageGeometry(true), []),
@@ -382,7 +508,7 @@ function Document({
     cam.updateProjectionMatrix();
     const tween = gsap.to(cam.position, {
       z: distance,
-      duration: reduced ? 0 : 1.35,
+      duration: reduced || coverAcknowledged.current ? 0 : 1.1,
       ease: "power3.inOut",
       onUpdate: invalidate,
     });
@@ -398,11 +524,17 @@ function Document({
     coverMoving.current = true;
     onBusy(true);
     onCity(null);
-    const duration = reduced ? 0 : 1.1;
+    const duration =
+      reduced || coverAcknowledged.current || !coverInitialized.current
+        ? 0
+        : 1.1;
+    coverAcknowledged.current = false;
+    coverInitialized.current = true;
     const timeline = gsap.timeline({
       onUpdate: invalidate,
       onComplete: () => {
         coverMoving.current = false;
+        if (!open) setDisplayed(0);
         onBusy(false);
         invalidate();
       },
@@ -446,13 +578,11 @@ function Document({
       timeline.kill();
       coverMoving.current = false;
     };
-  }, [spreadOpen, backCover, reduced, invalidate, onBusy, onCity]);
+  }, [spreadOpen, backCover, open, reduced, invalidate, onBusy, onCity]);
   useEffect(() => {
     if (!open) {
       awaitingPage.current = null;
-      setDisplayed(0);
       setTurn(null);
-      onBusy(false);
       onCity(null);
       return;
     }
@@ -550,18 +680,22 @@ function Document({
   const begin = (e: ThreeEvent<PointerEvent>) => {
     suppressClick.current = false;
     lightAt(e);
+    if (turn || coverMoving.current) return;
+    lastPointerType.current = e.nativeEvent.pointerType;
+    cityPinned.current = false;
     if (uv && !uvFull) {
       lampDrag.current = { x: e.nativeEvent.clientX, y: e.nativeEvent.clientY };
       suppressClick.current = false;
       return;
     }
-    if (!open || turn || coverMoving.current) return;
-    lastPointerType.current = e.nativeEvent.pointerType;
-    cityPinned.current = false;
+    if (!open) return;
     gesture.current = {
       x: e.nativeEvent.clientX,
       y: e.nativeEvent.clientY,
       time: performance.now(),
+      lastX: e.nativeEvent.clientX,
+      lastTime: performance.now(),
+      velocity: 0,
     };
     dragValue.current = 0;
     settleRequest.current = null;
@@ -605,7 +739,7 @@ function Document({
     side: "left" | "right" = "right",
   ) => {
     e.stopPropagation();
-    if (suppressClick.current) return;
+    if (suppressClick.current || coverMoving.current) return;
     const id = side === "right" ? hit(e) : null;
     if (id) onSelect(id);
     const city = cityHit(e, side);
@@ -660,7 +794,7 @@ function Document({
               receiveShadow
               onClick={(e) => {
                 e.stopPropagation();
-                if (suppressClick.current) return;
+                if (suppressClick.current || coverMoving.current) return;
                 if (backCover) onTurn(textures.spreads.length - 1);
                 else if (!open) onOpen();
               }}
@@ -668,14 +802,14 @@ function Document({
               <primitive object={coverBody} attach="geometry" />
               <meshPhysicalMaterial
                 color="#3b0c25"
-                roughness={0.65}
+                roughness={0.78}
                 bumpMap={textures.leather}
                 bumpScale={0.025}
               />
             </mesh>
-            {Array.from({ length: 9 }, (_, i) => (
-              <mesh key={i} position={[PW / 2, 0, 0.006 + i * 0.017]}>
-                <boxGeometry args={[SHEET_WIDTH, SHEET_HEIGHT, 0.012]} />
+            {Array.from({ length: 15 }, (_, i) => (
+              <mesh key={i} position={[PW / 2, 0, 0.006 + i * 0.01]}>
+                <boxGeometry args={[SHEET_WIDTH, SHEET_HEIGHT, 0.009]} />
                 <meshStandardMaterial
                   color={i % 2 ? "#d7d4bf" : "#ece7d4"}
                   roughness={0.9}
@@ -692,7 +826,12 @@ function Document({
                 onPointerOut={leave}
                 receiveShadow
               >
-                <meshStandardMaterial map={face("right")} roughness={0.87} />
+                <meshStandardMaterial
+                  map={face("right")}
+                  bumpMap={textures.paperBump}
+                  bumpScale={0.006}
+                  roughness={0.87}
+                />
               </mesh>
               {open && !turn && displayed === 0 && (
                 <VisaOverlay geometry={stationary} map={highlight} />
@@ -726,12 +865,19 @@ function Document({
             castShadow
             receiveShadow
           >
-            <meshStandardMaterial map={face("front")} roughness={0.85} />
+            <meshStandardMaterial
+              map={face("front")}
+              bumpMap={textures.paperBump}
+              bumpScale={0.006}
+              roughness={0.85}
+            />
           </mesh>
 
           <mesh geometry={back} castShadow receiveShadow>
             <meshStandardMaterial
               map={face("back")}
+              bumpMap={textures.paperBump}
+              bumpScale={0.006}
               side={THREE.BackSide}
               roughness={0.85}
             />
@@ -744,7 +890,7 @@ function Document({
             receiveShadow
             onClick={(e) => {
               e.stopPropagation();
-              if (suppressClick.current) return;
+              if (suppressClick.current || coverMoving.current) return;
               if (backCover) onTurn(textures.spreads.length - 1);
               else onOpen();
             }}
@@ -752,16 +898,16 @@ function Document({
             <primitive object={coverBody} attach="geometry" />
             <meshPhysicalMaterial
               color="#3b0c25"
-              roughness={0.55}
+              roughness={0.74}
               bumpMap={textures.leather}
-              bumpScale={0.035}
+              bumpScale={0.018}
             />
           </mesh>
           <mesh
             position={[PW / 2, 0, 0.078]}
             onClick={(e) => {
               e.stopPropagation();
-              if (suppressClick.current) return;
+              if (suppressClick.current || coverMoving.current) return;
               if (backCover) onTurn(textures.spreads.length - 1);
               else onOpen();
             }}
@@ -783,10 +929,10 @@ function Document({
               map={textures.foil}
               transparent
               alphaTest={0.12}
-              metalness={0.83}
-              roughness={0.38}
+              metalness={0.92}
+              roughness={0.32}
               color="#d8b36b"
-              envMapIntensity={1.6}
+              envMapIntensity={1.1}
               depthWrite={false}
             />
           </mesh>
@@ -799,7 +945,12 @@ function Document({
             onClick={(e) => select(e, "left")}
           >
             <primitive object={coverLining} attach="geometry" />
-            <meshStandardMaterial map={face("left")} roughness={0.9} />
+            <meshStandardMaterial
+              map={face("left")}
+              bumpMap={textures.paperBump}
+              bumpScale={0.006}
+              roughness={0.9}
+            />
             <UVPrint
               active={uv && spreadOpen && !turn}
               geometry={coverLining}
@@ -809,6 +960,13 @@ function Document({
             />
           </mesh>
         </group>
+        <lineSegments
+          geometry={stitching}
+          visible={spreadOpen}
+          raycast={() => {}}
+        >
+          <lineBasicMaterial color="#8e7d6c" transparent opacity={0.6} />
+        </lineSegments>
         <mesh position={[0.005, 0, 0.06]}>
           <cylinderGeometry args={[0.047, 0.047, PH + 0.08, 12]} />
           <meshStandardMaterial color="#381022" roughness={0.7} />

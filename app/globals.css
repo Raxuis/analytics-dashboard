@@ -886,3 +886,177 @@ p {
 .simple-uv-memory strong {
   font-weight: 600;
 }
+
+/* A single native sheet stays readable without zooming or precision pointing. */
+.document-controls .reader-open {
+  display: none;
+}
+@media (max-width: 680px) {
+  .document-controls .reader-open {
+    display: inline-flex;
+  }
+}
+.page-reader {
+  width: min(520px, calc(100vw - 20px));
+  max-height: calc(100dvh - 20px);
+  margin: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 13px;
+  color: #f3f3f4;
+  background: #232326;
+  overflow: hidden;
+  box-shadow: 0 14px 50px #0007;
+}
+.page-reader[open] {
+  display: flex;
+  flex-direction: column;
+}
+.page-reader::backdrop {
+  background: #141416ed;
+}
+.reader-heading,
+.reader-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 12px;
+  flex-shrink: 0;
+}
+.reader-heading h2 {
+  font-size: 15px;
+  font-weight: 500;
+}
+.reader-heading button,
+.reader-controls button {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 8px;
+}
+.reader-heading button:hover,
+.reader-controls button:hover:not(:disabled) {
+  background: #35353b;
+}
+.reader-body {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: #8b7b94 #e8dfd4;
+}
+.reader-body .simple-view-document {
+  width: 100%;
+}
+.reader-body .simple-passport {
+  display: block;
+  padding: 6px;
+  background: #3d0827;
+  box-shadow: none;
+  border-radius: 0;
+}
+.reader-body .simple-page {
+  min-height: min(620px, calc(100dvh - 150px));
+  padding: 30px 25px 49px;
+  border-radius: 7px;
+  background-color: #eee5df;
+}
+.reader-body .simple-page::before {
+  background: url("/identity/register-guilloche.svg") center / cover;
+  opacity: 0.32;
+  z-index: -1;
+}
+.reader-body .simple-page {
+  isolation: isolate;
+}
+.reader-body .simple-page dd,
+.reader-body .simple-site dd {
+  font-size: 18px;
+}
+.reader-body .simple-page dt {
+  font-size: 11px;
+}
+.reader-body .simple-page-header {
+  margin-bottom: 30px;
+}
+.reader-body .simple-mrz {
+  font-size: 9px;
+}
+.reader-controls {
+  justify-content: center;
+}
+.reader-controls > span {
+  color: #b5b5bd;
+  font-size: 12px;
+  min-width: 45px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.reader-controls button[aria-pressed="true"] {
+  background: #3b334d;
+  color: #e2d5ff;
+}
+.simple-page {
+  padding-bottom: 46px;
+}
+.simple-page-folio {
+  position: absolute;
+  right: 21px;
+  bottom: 15px;
+  color: #675b66;
+  font:
+    11px var(--font-ocr),
+    monospace;
+}
+.page-reader .city-detail {
+  font-size: 14px;
+}
+.page-reader .city-note {
+  font-size: 13px;
+}
+@media (max-width: 360px) {
+  .reader-body .simple-page {
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+  .reader-body .simple-biodata {
+    gap: 16px;
+  }
+  .reader-body .simple-biodata > img {
+    width: 86px;
+    height: 115px;
+  }
+  .reader-body .simple-page dd {
+    font-size: 16px;
+  }
+  .reader-body .simple-page-header {
+    gap: 8px;
+  }
+}
+
+.page-counter {
+  width: auto;
+  min-width: 45px;
+  white-space: nowrap;
+  padding: 0 3px;
+}
+.page-reader.is-uv .simple-page {
+  background-color: #e2dbe9;
+}
+.page-reader.is-uv .simple-page::before {
+  opacity: 0.7;
+}
+@media (max-width: 360px) {
+  .document-controls .reader-open span,
+  .document-controls .uv-button span {
+    display: none;
+  }
+  .document-controls .reader-open,
+  .document-controls .uv-button {
+    width: 44px;
+    padding: 0;
+  }
+}

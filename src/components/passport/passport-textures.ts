@@ -13,11 +13,12 @@ import { destinations, type DestinationId } from "./destinations";
 const W = 1024,
   H = 1440;
 const ink = "#393747",
-  muted = "#8b808d",
+  muted = "#6d5f6b",
   red = "#b55d43";
 export type PassportTextures = {
   cover: THREE.CanvasTexture;
   leather: THREE.CanvasTexture;
+  paperBump: THREE.CanvasTexture;
   foil: THREE.CanvasTexture;
   identity: THREE.CanvasTexture;
   visas: THREE.CanvasTexture;
@@ -50,11 +51,13 @@ function text(
   font = "DM Sans",
   align: CanvasTextAlign = "left",
   weight = 400,
+  maxWidth?: number,
 ) {
   c.fillStyle = color;
   c.font = `${weight} ${size}px ${font === "monospace" ? "monospace" : `"${font}"`}`;
   c.textAlign = align;
-  c.fillText(str, x, y);
+  if (maxWidth) c.fillText(str, x, y, maxWidth);
+  else c.fillText(str, x, y);
 }
 function line(
   c: CanvasRenderingContext2D,
@@ -118,19 +121,19 @@ function paper(page = 1) {
   text(
     c,
     String(page).padStart(2, "0"),
-    W - 64,
+    W - 72,
     H - 55,
-    21,
-    "#7c6c87",
-    "monospace",
+    24,
+    "#675b66",
+    "OCR B",
     "right",
   );
   return { el, c };
 }
 function documentHeader(c: CanvasRenderingContext2D, title: string) {
-  text(c, "PASSEPORT PERSONNEL", 68, 89, 25, "#4d506a", "DM Sans", "left", 600);
-  text(c, "RAXUIS", W - 68, 89, 22, "#786b85", "DM Sans", "right");
-  text(c, title, 68, 149, 23, "#786b85", "DM Sans", "left", 500);
+  text(c, "PASSEPORT PERSONNEL", 72, 89, 25, "#4d506a", "DM Sans", "left", 600);
+  text(c, "RAXUIS", W - 72, 89, 22, "#675b75", "DM Sans", "right");
+  text(c, title, 72, 149, 23, "#675b75", "DM Sans", "left", 500);
 }
 function field(
   c: CanvasRenderingContext2D,
@@ -243,6 +246,7 @@ function travelVignette(
     "DM Sans",
     "left",
     700,
+    w - 50,
   );
   text(c, "VOYAGES PERSONNELS", 25, 109, 17, tint, "DM Sans", "left", 500);
   if (memory.visits)
@@ -406,13 +410,32 @@ export async function loadPassportTextures(
   foil.c.moveTo(W / 2 + 16, 1272);
   foil.c.lineTo(W / 2 + 43, 1272);
   foil.c.stroke();
-  const leather = canvas(256, 256);
-  for (let y = 0; y < 256; y++)
-    for (let x = 0; x < 256; x++) {
-      const v = 95 + ((x * 17 + y * 31 + ((x * y) % 73)) % 65);
-      leather.c.fillStyle = `rgb(${v},${v},${v})`;
-      leather.c.fillRect(x, y, 1, 1);
-    }
+  const leather = canvas(512, 512);
+  const pores = leather.c.createImageData(512, 512);
+  let materialSeed = 947;
+  for (let i = 0; i < pores.data.length; i += 4) {
+    materialSeed = (materialSeed * 16807) % 2147483647;
+    const value = 124 + (materialSeed % 33);
+    pores.data[i] = pores.data[i + 1] = pores.data[i + 2] = value;
+    pores.data[i + 3] = 255;
+  }
+  leather.c.putImageData(pores, 0, 0);
+  const paperGrain = canvas(256, 256);
+  paperGrain.c.fillStyle = "#808080";
+  paperGrain.c.fillRect(0, 0, 256, 256);
+  for (let i = 0; i < 9000; i++) {
+    materialSeed = (materialSeed * 16807) % 2147483647;
+    paperGrain.c.fillStyle = i % 2 ? "#919191" : "#727272";
+    paperGrain.c.fillRect(
+      materialSeed % 256,
+      Math.floor(materialSeed / 256) % 256,
+      i % 7 === 0 ? 3 : 1,
+      1,
+    );
+  }
+  const paperBump = texture(paperGrain.el, false);
+  paperBump.wrapS = paperBump.wrapT = THREE.RepeatWrapping;
+  paperBump.repeat.set(4, 6);
   const id = paper(1);
   documentHeader(id.c, "");
   // One aligned identity block, with a true portrait crop and a separate machine-readable zone.
@@ -425,17 +448,17 @@ export async function loadPassportTextures(
     (portrait.height - cropHeight) / 2,
     cropWidth,
     cropHeight,
-    73,
+    72,
     260,
     319,
     440,
   );
-  text(id.c, "IDENTITÉ", 73, 166, 42, "#31344b", "DM Sans", "left", 600);
+  text(id.c, "IDENTITÉ", 72, 166, 42, "#31344b", "DM Sans", "left", 600);
   field(id.c, "Nom", "RACLOT", 455, 282, 49);
   field(id.c, "Prénom", "RAPHAËL", 455, 445, 47);
   field(id.c, "Pseudonyme", "RAXUIS", 455, 608, 45);
-  line(id.c, 73, 793, W - 146, "#84768e55");
-  field(id.c, "Site personnel", "raphaelraclot.dev", 73, 870, 43);
+  line(id.c, 72, 793, W - 144, "#84768e55");
+  field(id.c, "Site personnel", "raphaelraclot.dev", 72, 870, 43);
   // Clear reading strip, with equal optical cells and two full-width 44-character lines.
   id.c.fillStyle = "#f4eee5";
   id.c.fillRect(58, 1140, W - 116, 204);
@@ -604,6 +627,7 @@ export async function loadPassportTextures(
     cover: texture(cover.el),
     foil: texture(foil.el),
     leather: texture(leather.el, false),
+    paperBump,
     identity: spreads[0]!.left,
     visas: spreads[0]!.right,
     environment,

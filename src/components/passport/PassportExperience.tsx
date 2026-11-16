@@ -19,6 +19,7 @@ import {
   Github,
   Linkedin,
   Link2,
+  Maximize2,
   Scan,
   X,
 } from "lucide-react";
@@ -28,6 +29,7 @@ import {
   type DestinationId,
 } from "./destinations";
 
+import { PassportReader } from "./PassportReader";
 import { SimplePassport } from "./SimplePassport";
 
 const PassportScene = dynamic(() => import("./PassportScene"), { ssr: false });
@@ -74,12 +76,26 @@ export default function PassportExperience() {
   const [reduced, setReduced] = useState(false),
     [mounted, setMounted] = useState(false),
     [simpleMode, setSimpleMode] = useState(false);
+  const [readingIndex, setReadingIndex] = useState<number | null>(null);
+  const readerButton = useRef<HTMLButtonElement>(null);
+  const readerFocusPending = useRef(false);
   const [uvFull, setUvFull] = useState(false);
   const [turning, setTurning] = useState(false);
   const [city, setCity] = useState<
     (CityMarker & { clientX: number; clientY: number }) | null
   >(null);
-  const onBusy = useCallback((value: boolean) => setTurning(value), []);
+  const onBusy = useCallback((value: boolean) => {
+    setTurning(value);
+    if (value) {
+      setSelected(null);
+      setCity(null);
+    } else if (readerFocusPending.current) {
+      readerFocusPending.current = false;
+      requestAnimationFrame(() =>
+        readerButton.current?.focus({ preventScroll: true }),
+      );
+    }
+  }, []);
   const onCity = useCallback(
     (value: (CityMarker & { clientX: number; clientY: number }) | null) =>
       setCity(value),
@@ -173,6 +189,20 @@ export default function PassportExperience() {
     setPage(0);
     setUv(false);
   }
+  const exitReader = (index: number) => {
+    const spread = Math.floor(index / 2);
+    const moving = spread !== page && !failed && !simpleMode;
+    readerFocusPending.current = moving;
+    setReadingIndex(null);
+    onTurn(spread);
+    if (!moving)
+      requestAnimationFrame(() => {
+        const target = readerButton.current?.disabled
+          ? menuButton.current
+          : (readerButton.current ?? menuButton.current);
+        target?.focus({ preventScroll: true });
+      });
+  };
   const chosen = destinations.find((d) => d.id === selected);
   return (
     <main
@@ -271,6 +301,8 @@ export default function PassportExperience() {
           <button
             className={`uv-button ${uv ? "active" : ""}`}
             aria-pressed={uv}
+            aria-label="Lumière UV"
+            disabled={turning}
             onClick={() => setUv((v) => !v)}
             title="Lumière UV"
           >
@@ -281,12 +313,30 @@ export default function PassportExperience() {
             <button
               className="uv-scope"
               aria-pressed={uvFull}
+              disabled={turning}
               onClick={() => setUvFull((v) => !v)}
               title={
                 uvFull ? "Revenir à la lampe mobile" : "Révéler toute la page"
               }
             >
               {uvFull ? "Lampe" : "Tout éclairer"}
+            </button>
+          )}
+          {open && page < spreadCount && (
+            <button
+              ref={readerButton}
+              className="reader-open"
+              disabled={turning}
+              onClick={() => {
+                setCity(null);
+                setSelected(null);
+                setReadingIndex(page * 2);
+              }}
+              aria-label="Lire une page en plein écran"
+              title="Lire une page"
+            >
+              <Maximize2 size={17} />
+              <span>Lire</span>
             </button>
           )}
           {open ? (
@@ -323,13 +373,18 @@ export default function PassportExperience() {
               <button
                 aria-label="Fermer le passeport"
                 onClick={close}
+                disabled={turning}
                 title="Fermer"
               >
                 <X size={17} />
               </button>
             </>
           ) : (
-            <button className="control-open" onClick={onOpen}>
+            <button
+              className="control-open"
+              onClick={onOpen}
+              disabled={turning}
+            >
               Ouvrir <ArrowRight size={16} />
             </button>
           )}
@@ -399,6 +454,14 @@ export default function PassportExperience() {
             Ouvrir <ArrowUpRight size={16} />
           </a>
         </aside>
+      )}
+      {readingIndex !== null && (
+        <PassportReader
+          initialPage={readingIndex}
+          uv={uv}
+          onUv={() => setUv((v) => !v)}
+          onExit={exitReader}
+        />
       )}
       <noscript>
         <nav className="no-script-links" aria-label="Liens directs">
