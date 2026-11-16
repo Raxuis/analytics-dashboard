@@ -106,6 +106,8 @@ export function summarizeAnalytics(
     id,
     label,
     count: 0,
+    scene: 0,
+    direct: 0,
   }));
   for (const day of pageviews)
     for (const item of day.events)
@@ -127,7 +129,10 @@ export function summarizeAnalytics(
         const destination = destinations.find(
           (value) => value.id === event?.destination,
         );
-        if (destination) destination.count += count;
+        if (destination && event) {
+          destination.count += count;
+          destination[event.placement] += count;
+        }
       }
   return {
     totalPageviews,
@@ -136,7 +141,12 @@ export function summarizeAnalytics(
       .reduce((sum, day) => sum + total(day), 0),
     averagePageviews: pageviews.length ? totalPageviews / pageviews.length : 0,
     totalClicks,
-    days: pageviews.map((day) => ({ date: day.date, count: total(day) })),
+    days: pageviews.map((day) => ({
+      date: day.date,
+      count: total(day),
+      clicks: clicks.filter(item => item.date === day.date).reduce((sum, item) => sum + total(item), 0),
+    })),
+    unlocatedViews: totalPageviews - [...countries.values()].reduce((sum, count) => sum + count, 0),
     topCountries: [...countries.entries()]
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5),
