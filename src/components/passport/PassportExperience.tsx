@@ -153,14 +153,14 @@ export default function PassportExperience() {
       window.removeEventListener("pointerdown", outside);
     };
   }, [showLinks, selected]);
-  function close() {
+  const close = useCallback(() => {
     setOpen(false);
     setPage(0);
     setCity(null);
     setTurning(false);
     setSelected(null);
     setUv(false);
-  }
+  }, []);
   function simple() {
     const next = !(simpleMode || failed);
     setSimpleMode(next);
@@ -228,6 +228,7 @@ export default function PassportExperience() {
                 reduced={reduced}
                 selected={selected}
                 onOpen={onOpen}
+                onClose={close}
                 onSelect={onSelect}
                 onTurn={onTurn}
                 onBusy={onBusy}
@@ -293,10 +294,14 @@ export default function PassportExperience() {
               <button
                 aria-label="Page précédente"
                 onClick={() => {
-                  onTurn(Math.max(0, page - 1));
+                  if (page === 0) close();
+                  else onTurn(page - 1);
                   setSelected(null);
                 }}
-                disabled={page === 0 || turning}
+                disabled={turning}
+                title={
+                  page === 0 ? "Première de couverture" : "Page précédente"
+                }
               >
                 <ArrowLeft size={17} />
               </button>

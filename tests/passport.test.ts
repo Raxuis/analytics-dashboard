@@ -279,3 +279,14 @@ test("simple UV view reveals actual stay counts and remains usable without WebGL
   assert.match(uv, /aria-pressed="true"/);
   assert.ok(!uv.includes("<canvas"));
 });
+
+test("swipes traverse both covers without treating the front cover as a printed spread", async () => {
+  const { swipeTarget } = await import("../src/components/passport/page-turn");
+  assert.equal(swipeTarget(0, -1, 3), "front-cover");
+  assert.equal(swipeTarget(1, -1, 3), 0);
+  assert.equal(swipeTarget(0, 1, 3), 1);
+  assert.equal(swipeTarget(2, 1, 3), 3);
+  assert.equal(swipeTarget(3, -1, 3), 2);
+  assert.equal(swipeTarget(3, 1, 3), null);
+  assert.equal(swipeTarget(0, 0, 3), null);
+});

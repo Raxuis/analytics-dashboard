@@ -15,6 +15,7 @@ import {
   queuedTurn,
   turnPose,
   swipeDirection,
+  swipeTarget,
   type PageTurn,
 } from "./page-turn";
 import type { DestinationId } from "./destinations";
@@ -46,6 +47,7 @@ export type SceneProps = {
   reduced: boolean;
   selected: DestinationId | null;
   onOpen: () => void;
+  onClose: () => void;
   onSelect: (id: DestinationId) => void;
   onTurn: (page: number) => void;
   onBusy: (busy: boolean) => void;
@@ -181,6 +183,7 @@ function Document({
   reduced,
   selected,
   onOpen,
+  onClose,
   onSelect,
   onTurn,
   onBusy,
@@ -304,10 +307,13 @@ function Document({
         else settleRequest.current = complete;
       } else if (!turn) {
         const direction = swipeDirection(dx, dy);
-        const next =
-          (backCover ? textures.spreads.length : displayed) + direction;
-        if (direction && next >= 0 && next <= textures.spreads.length)
-          onTurn(next);
+        const target = swipeTarget(
+          backCover ? textures.spreads.length : displayed,
+          direction,
+          textures.spreads.length,
+        );
+        if (target === "front-cover") onClose();
+        else if (target !== null) onTurn(target);
       }
       gl.domElement.style.cursor = "auto";
     };
@@ -331,6 +337,7 @@ function Document({
     displayed,
     textures.spreads.length,
     onTurn,
+    onClose,
     gl,
     size.width,
     backCover,

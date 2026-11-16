@@ -52,3 +52,15 @@ export function queuedTurn(
   if (awaiting !== null && requested !== awaiting) return null;
   return requested === displayed ? null : requested;
 }
+
+/** Covers are navigation endpoints, never textures in the printed-spread array. */
+export function swipeTarget(
+  page: number,
+  direction: -1 | 0 | 1,
+  spreadCount: number,
+): number | "front-cover" | null {
+  if (!direction) return null;
+  if (page === 0 && direction === -1) return "front-cover";
+  const next = page + direction;
+  return next >= 0 && next <= spreadCount ? next : null;
+}
