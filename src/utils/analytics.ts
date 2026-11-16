@@ -144,9 +144,13 @@ export function summarizeAnalytics(
     days: pageviews.map((day) => ({
       date: day.date,
       count: total(day),
-      clicks: clicks.filter(item => item.date === day.date).reduce((sum, item) => sum + total(item), 0),
+      clicks: clicks
+        .filter((item) => item.date === day.date)
+        .reduce((sum, item) => sum + total(item), 0),
     })),
-    unlocatedViews: totalPageviews - [...countries.values()].reduce((sum, count) => sum + count, 0),
+    unlocatedViews:
+      totalPageviews -
+      [...countries.values()].reduce((sum, count) => sum + count, 0),
     topCountries: [...countries.entries()]
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5),

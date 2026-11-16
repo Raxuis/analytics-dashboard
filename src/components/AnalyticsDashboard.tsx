@@ -1,90 +1,309 @@
+"use client";
+import React, { useState, useTransition, type CSSProperties } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
+import { ArrowLeft, RefreshCw, Scan } from "lucide-react";
 import type { AnalyticsSummary } from "@/utils/analytics";
+import { destinations } from "./passport/destinations";
+import { visaAccents, visaPapers } from "./passport/passport-layout";
+import isoCountries from "./passport/country-iso2.json";
+
+const numbers = new Intl.NumberFormat("fr-FR");
+const countryNames = new Intl.DisplayNames(["fr"], { type: "region" });
+function dateOf(value: string) {
+  const [day, month, year] = value.split("/").map(Number);
+  return new Date(Date.UTC(year!, month! - 1, day));
+}
+function shortDate(value: string) {
+  return new Intl.DateTimeFormat("fr-FR", {
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+  }).format(dateOf(value));
+}
+function period(summary: AnalyticsSummary) {
+  const first = summary.days[0]?.date,
+    last = summary.days.at(-1)?.date;
+  if (!first || !last) return "Sept derniers jours";
+  const longDate = new Intl.DateTimeFormat("fr-FR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+  return `${shortDate(first)} au ${longDate.format(dateOf(last))}`;
+}
+function count(value: number, noun: string) {
+  return `${numbers.format(value)} ${noun}${value > 1 ? "s" : ""}`;
+}
 
 export default function AnalyticsDashboard({
   summary,
 }: {
-  summary: AnalyticsSummary;
+  summary: AnalyticsSummary | null;
 }) {
-  const maxViews = Math.max(1, ...summary.days.map((day) => day.count));
+  const [uv, setUv] = useState(false);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [refreshing, startRefresh] = useTransition();
+  const router = useRouter();
   return (
-    <div className="analytics-dashboard">
-      <section className="analytics-metrics" aria-label="Vues et clics">
-        <article>
-          <p>Vues de l’accueil</p>
-          <strong>{summary.totalPageviews}</strong>
-          <small>Sur sept jours</small>
-        </article>
-        <article>
-          <p>Vues aujourd’hui</p>
-          <strong>{summary.todayPageviews}</strong>
-          <small>Depuis minuit UTC</small>
-        </article>
-        <article>
-          <p>Clics sortants</p>
-          <strong>{summary.totalClicks}</strong>
-          <small>Sur sept jours</small>
-        </article>
-      </section>
-      <section className="analytics-chart">
-        <h2>Les passages, jour après jour</h2>
-        <div className="analytics-bars" role="list">
-          {summary.days.map((day) => (
-            <div
-              className="analytics-bar"
-              role="listitem"
-              key={day.date}
-              aria-label={`${day.date} : ${day.count} vues`}
-            >
-              <strong>{day.count}</strong>
-              <div className="analytics-bar-track">
-                <span
-                  style={{
-                    height: `${Math.max(2, (day.count / maxViews) * 100)}%`,
-                  }}
-                />
-              </div>
-              <small>{day.date.slice(0, 5)}</small>
-            </div>
-          ))}
-        </div>
-      </section>
-      <div className="analytics-details">
-        <section className="analytics-destinations">
-          <h2>Les destinations</h2>
-          {summary.destinations.map((destination) => (
-            <div className="analytics-row" key={destination.id}>
-              <span>{destination.label}</span>
-              <strong>
-                {destination.count} clic{destination.count > 1 ? "s" : ""}
-              </strong>
-            </div>
-          ))}
-          {!summary.totalClicks && (
-            <p>Aucun clic enregistré sur cette période.</p>
-          )}
-        </section>
-        <section className="analytics-countries">
-          <h2>Les pays de passage</h2>
-          {summary.topCountries.length ? (
-            summary.topCountries.map(([country, count]) => (
-              <div className="analytics-row" key={country}>
-                <span>{country}</span>
-                <strong>
-                  {count} vue{count > 1 ? "s" : ""}
-                </strong>
-              </div>
-            ))
+    <main className={`register-site ${uv ? "register-uv" : ""}`}>
+      <header className="register-header">
+        <Link href="/" className="wordmark" aria-label="Raxuis, accueil">
+          <Image
+            src="/identity/raxuis-logo.png"
+            width={28}
+            height={28}
+            alt=""
+          />
+          <span>Raxuis</span>
+        </Link>
+        <Link className="register-back" href="/">
+          <ArrowLeft size={15} />
+          Retour au passeport
+        </Link>
+      </header>
+      <div
+        className="register-book"
+        aria-label="Registre des passages de Raxuis"
+        aria-busy={refreshing}
+      >
+        <section
+          className="register-leaf register-passages"
+          aria-labelledby="register-title"
+        >
+          <div className="register-leaf-heading">
+            <h1 id="register-title">Passages</h1>
+            <p>{summary ? period(summary) : "Sept derniers jours"}</p>
+          </div>
+          {summary ? (
+            <>
+              <table className="register-ledger">
+                <caption className="sr-only">
+                  Vues de l’accueil et clics sortants par journée UTC
+                </caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">Vues</th>
+                    <th scope="col">Clics</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {summary.days.map((day, index) => (
+                    <tr
+                      key={day.date}
+                      className={
+                        index === summary.days.length - 1
+                          ? "register-latest"
+                          : ""
+                      }
+                    >
+                      <th scope="row">
+                        <time
+                          dateTime={dateOf(day.date).toISOString().slice(0, 10)}
+                        >
+                          {shortDate(day.date)}
+                        </time>
+                      </th>
+                      <td
+                        className={
+                          day.count >= 1_000_000
+                            ? "register-long-number"
+                            : undefined
+                        }
+                      >
+                        {numbers.format(day.count)}
+                      </td>
+                      <td
+                        className={
+                          day.clicks >= 1_000_000
+                            ? "register-long-number"
+                            : undefined
+                        }
+                      >
+                        {numbers.format(day.clicks)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <th scope="row">Total</th>
+                    <td>{count(summary.totalPageviews, "vue")}</td>
+                    <td>{count(summary.totalClicks, "clic")}</td>
+                  </tr>
+                </tfoot>
+              </table>
+              <p className="register-timezone">Journées comptées en UTC</p>
+              {summary.totalPageviews === 0 && summary.totalClicks === 0 && (
+                <p className="register-empty">
+                  Aucun passage enregistré sur cette période.
+                </p>
+              )}
+            </>
           ) : (
-            <p>Aucun pays renseigné sur cette période.</p>
+            <div className="register-unavailable" role="status">
+              <h2>Le registre est indisponible.</h2>
+              <p>Les passages ne peuvent pas être chargés pour le moment.</p>
+              <button
+                onClick={() => startRefresh(() => router.refresh())}
+                disabled={refreshing}
+              >
+                {refreshing ? "Actualisation…" : "Réessayer"}
+              </button>
+            </div>
           )}
+          <span className="register-folio" aria-hidden="true">
+            01
+          </span>
+        </section>
+        <section
+          className="register-leaf register-destinations"
+          aria-labelledby="register-destinations-title"
+        >
+          <div className="register-leaf-heading">
+            <h2 id="register-destinations-title">Destinations</h2>
+          </div>
+          <div className="register-visas">
+            {destinations.map((d) => {
+              const stats = summary?.destinations.find(
+                (item) => item.id === d.id,
+              );
+              const expanded = !!stats && (uv || selected === d.id);
+              return (
+                <button
+                  key={d.id}
+                  type="button"
+                  className={`register-visa register-visa-${d.id}`}
+                  style={
+                    {
+                      "--visa-paper": visaPapers[d.id],
+                      "--visa-accent": visaAccents[d.id],
+                    } as CSSProperties
+                  }
+                  disabled={!stats}
+                  aria-expanded={expanded}
+                  aria-controls={`register-origin-${d.id}`}
+                  aria-label={`${d.label}, ${stats ? count(stats.count, "clic") : "données indisponibles"}, origine des clics`}
+                  onClick={() => setSelected(selected === d.id ? null : d.id)}
+                  title="Origine des clics"
+                >
+                  <strong>{d.label}</strong>
+                  <span className="register-visa-count">
+                    {stats ? count(stats.count, "clic") : "Indisponible"}
+                  </span>
+                  <span
+                    className="register-visa-origin"
+                    id={`register-origin-${d.id}`}
+                    hidden={!expanded}
+                  >
+                    <span>
+                      Passeport <b>{numbers.format(stats?.scene ?? 0)}</b>
+                    </span>
+                    <span>
+                      Liens directs <b>{numbers.format(stats?.direct ?? 0)}</b>
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          <section
+            className="register-countries"
+            aria-labelledby="register-countries-title"
+          >
+            <h2 id="register-countries-title">Pays de passage</h2>
+            {summary?.topCountries.length ? (
+              <ul>
+                {summary.topCountries.map(([code, views]) => {
+                  const silhouette =
+                    isoCountries[code as keyof typeof isoCountries];
+                  const name = countryNames.of(code) ?? code;
+                  return (
+                    <li key={code}>
+                      {silhouette ? (
+                        <span
+                          className="register-country-art"
+                          aria-hidden="true"
+                          style={{
+                            maskImage: `url(/identity/countries/${silhouette}.svg)`,
+                          }}
+                        />
+                      ) : (
+                        <span
+                          className="register-country-code"
+                          aria-hidden="true"
+                        >
+                          {code}
+                        </span>
+                      )}
+                      <span>{name}</span>
+                      <span className="register-country-count">
+                        {count(views, "vue")}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="register-empty">
+                {summary
+                  ? "Aucun pays renseigné sur cette période."
+                  : "Données indisponibles."}
+              </p>
+            )}
+            {!!summary?.unlocatedViews && (
+              <p className="register-country-note">
+                {count(summary.unlocatedViews, "vue")} sans pays renseigné
+              </p>
+            )}
+          </section>
+          <span className="register-folio" aria-hidden="true">
+            02
+          </span>
         </section>
       </div>
-      <p className="analytics-note">
-        Une vue est un chargement de page, pas un visiteur unique. Les clics
-        comptent les activations de liens, pas les arrivées sur les sites
-        externes. Les robots et visites répétées peuvent être inclus. Les
-        données sont conservées sept jours.
+      <div
+        className="register-tools"
+        role="group"
+        aria-label="Commandes du registre"
+      >
+        <span>7 jours</span>
+        <button
+          aria-pressed={uv}
+          onClick={() => setUv((v) => !v)}
+          disabled={!summary}
+          title="Révéler l’origine des clics"
+        >
+          <Scan size={16} />
+          <span>UV</span>
+        </button>
+        <button
+          onClick={() => startRefresh(() => router.refresh())}
+          disabled={refreshing}
+          aria-label="Actualiser les statistiques"
+          title="Actualiser"
+        >
+          <RefreshCw
+            size={16}
+            className={refreshing ? "register-refreshing" : ""}
+          />
+        </button>
+      </div>
+      <p className="register-method">
+        Une vue correspond à un chargement de l’accueil, pas à un visiteur
+        unique. Les clics comptent les liens activés. Les robots et les visites
+        répétées peuvent être inclus. Conservation des données : sept jours.
       </p>
-    </div>
+      <span className="sr-only" role="status">
+        {refreshing
+          ? "Actualisation des statistiques…"
+          : uv
+            ? "UV activé. Origine des clics révélée sur chaque visa."
+            : ""}
+      </span>
+    </main>
   );
 }

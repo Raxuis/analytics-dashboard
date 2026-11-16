@@ -277,14 +277,28 @@ test("Marketplace token without an endpoint never uses the old database", () => 
 
 test("register joins clicks by UTC day and keeps each click origin", () => {
   const result = summarizeAnalytics(
-    [{date:"15/11/2026",events:[{'{"country":"KR"}':2},{'{}':1}]},{date:"16/11/2026",events:[]}],
-    [{date:"16/11/2026",events:[{'{"destination":"github","placement":"scene"}':3},{'{"destination":"github","placement":"direct"}':2}]}],
+    [
+      { date: "15/11/2026", events: [{ '{"country":"KR"}': 2 }, { "{}": 1 }] },
+      { date: "16/11/2026", events: [] },
+    ],
+    [
+      {
+        date: "16/11/2026",
+        events: [
+          { '{"destination":"github","placement":"scene"}': 3 },
+          { '{"destination":"github","placement":"direct"}': 2 },
+        ],
+      },
+    ],
     "16/11/2026",
   );
-  assert.deepEqual(result.days, [{date:"15/11/2026",count:3,clicks:0},{date:"16/11/2026",count:0,clicks:5}]);
-  const github=result.destinations.find(d=>d.id==="github");
-  assert.equal(github?.scene,3);
-  assert.equal(github?.direct,2);
-  assert.equal(github?.count,5);
-  assert.equal(result.unlocatedViews,1);
+  assert.deepEqual(result.days, [
+    { date: "15/11/2026", count: 3, clicks: 0 },
+    { date: "16/11/2026", count: 0, clicks: 5 },
+  ]);
+  const github = result.destinations.find((d) => d.id === "github");
+  assert.equal(github?.scene, 3);
+  assert.equal(github?.direct, 2);
+  assert.equal(github?.count, 5);
+  assert.equal(result.unlocatedViews, 1);
 });

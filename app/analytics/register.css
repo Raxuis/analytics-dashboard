@@ -1,0 +1,658 @@
+.register-site {
+  --register-paper: #e8dfd4;
+  --register-ink: #393747;
+  --register-muted: #675b66;
+  --register-rule: #b5a5a5;
+  --register-uv: #593c77;
+  min-height: 100svh;
+  padding: 0 32px 28px;
+  background: var(--stage, #141416);
+}
+.register-header {
+  min-height: 94px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+.register-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  font-size: 13px;
+  color: #c8c3c8;
+  text-decoration: underline;
+  text-underline-offset: 5px;
+  text-decoration-color: #797079;
+}
+.register-back:hover {
+  color: #fff;
+  text-decoration-color: currentColor;
+}
+.register-book {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  width: min(1180px, 100%);
+  margin: 14px auto 26px;
+  padding: 9px;
+  gap: 2px;
+  background: #3d0827;
+  border-radius: 27px 23px 23px 27px;
+  box-shadow:
+    0 20px 38px #0007,
+    inset 0 1px 2px #b16c8c;
+  color: var(--register-ink);
+}
+.register-leaf {
+  position: relative;
+  isolation: isolate;
+  min-width: 0;
+  min-height: 690px;
+  padding: clamp(26px, 3.2vw, 48px) clamp(24px, 3vw, 43px) 64px;
+  background: var(--register-paper);
+  overflow: hidden;
+}
+.register-leaf::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: url("/identity/register-guilloche.svg") center / 100% 100%;
+  opacity: 0.32;
+}
+.register-leaf::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+.register-passages {
+  border-radius: 20px 6px 6px 20px;
+}
+.register-passages::after {
+  background: linear-gradient(
+    90deg,
+    #fff2,
+    transparent 25%,
+    transparent 93%,
+    #6d454521
+  );
+}
+.register-destinations {
+  border-radius: 6px 17px 17px 6px;
+}
+.register-destinations::after {
+  background: linear-gradient(
+    90deg,
+    #60434322,
+    transparent 8%,
+    transparent 95%,
+    #fff2
+  );
+}
+.register-leaf-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding-bottom: 17px;
+  border-bottom: 1px solid var(--register-rule);
+  min-height: 48px;
+}
+.register-leaf-heading h1,
+.register-leaf-heading h2 {
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+.register-leaf-heading p {
+  font-size: 12px;
+  color: var(--register-muted);
+  text-align: right;
+  line-height: 1.6;
+  max-width: 175px;
+}
+.register-ledger {
+  width: 100%;
+  margin-top: 36px;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 15px;
+}
+.register-ledger th {
+  font-weight: 400;
+}
+.register-ledger th:first-child {
+  width: 42%;
+  text-align: left;
+}
+.register-ledger th,
+.register-ledger td {
+  padding: 19px 12px;
+}
+.register-ledger th:not(:first-child),
+.register-ledger td {
+  text-align: right;
+}
+.register-ledger thead th {
+  border-bottom: 1px solid var(--register-rule);
+  color: var(--register-muted);
+  padding-top: 0;
+  padding-bottom: 12px;
+  font-size: 13px;
+}
+.register-ledger tbody tr {
+  border-bottom: 1px solid #b5a5a58a;
+}
+.register-ledger tbody td,
+.register-ledger tfoot td {
+  font-family: var(--font-ocr), monospace;
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.register-ledger tbody tr.register-latest {
+  background: #8d5b7a1d;
+  border-bottom-color: transparent;
+}
+.register-ledger tbody tr:hover {
+  background: #8d5b7a12;
+}
+.register-ledger tfoot {
+  border-top: 1px solid var(--register-rule);
+}
+.register-ledger tfoot th,
+.register-ledger tfoot td {
+  padding-top: 23px;
+  padding-bottom: 0;
+  font-size: 14px;
+  white-space: normal;
+}
+.register-ledger tfoot th {
+  color: var(--register-muted);
+  font-size: 12px;
+}
+.register-timezone {
+  color: var(--register-muted);
+  font-size: 11px;
+  margin-top: 19px;
+  text-align: right;
+}
+.register-folio {
+  position: absolute;
+  bottom: 23px;
+  right: 27px;
+  font-family: var(--font-ocr), monospace;
+  font-size: 12px;
+  color: var(--register-muted);
+}
+.register-passages .register-folio {
+  left: 27px;
+  right: auto;
+}
+.register-visas {
+  display: grid;
+  grid-template-columns: 1.12fr 1fr;
+  align-items: center;
+  gap: 24px 20px;
+  padding: 28px 1px 30px;
+}
+.register-visa {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  width: 100%;
+  height: 146px;
+  padding: 17px 10px;
+  color: color-mix(in srgb, var(--visa-accent) 80%, #211c25);
+  background: var(--visa-paper);
+  border: 1px solid var(--visa-accent);
+  outline-offset: 5px;
+  transform: rotate(-2deg);
+  transition:
+    background 0.2s,
+    box-shadow 0.2s;
+}
+.register-visa::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px solid currentColor;
+  opacity: 0.35;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.register-visa::after {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border-radius: inherit;
+  background: url("/identity/register-guilloche.svg") center / cover;
+  opacity: 0.4;
+  pointer-events: none;
+}
+.register-visa strong,
+.register-visa > span {
+  position: relative;
+  z-index: 1;
+}
+.register-visa strong {
+  font-size: clamp(17px, 1.9vw, 25px);
+  letter-spacing: -0.02em;
+  font-weight: 500;
+}
+.register-visa-count {
+  font-family: var(--font-ocr), monospace;
+  font-size: 15px;
+  margin-top: 9px;
+}
+.register-visa-github {
+  border-radius: 50%;
+  height: 168px;
+  max-width: 184px;
+  justify-self: center;
+  transform: rotate(3deg);
+}
+.register-visa-linkedin {
+  height: 126px;
+  transform: rotate(-5deg);
+}
+.register-visa-x {
+  height: 126px;
+  transform: rotate(2deg);
+}
+.register-visa:hover:not(:disabled),
+.register-visa[aria-expanded="true"] {
+  box-shadow: inset 0 0 0 2px var(--visa-accent);
+}
+.register-visa:active:not(:disabled) {
+  filter: brightness(0.96);
+}
+.register-visa:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+.register-visa-origin {
+  display: block;
+  font-size: 10px;
+  line-height: 1.7;
+  margin-top: 9px;
+  width: max-content;
+  max-width: 100%;
+  text-align: left;
+  color: color-mix(in srgb, var(--visa-accent) 80%, #211c25);
+}
+.register-visa-origin[hidden] {
+  display: none;
+}
+.register-visa-origin > span {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+.register-visa-origin b {
+  font-family: var(--font-ocr), monospace;
+  font-weight: 400;
+}
+.register-countries {
+  border-top: 1px solid var(--register-rule);
+  padding-top: 17px;
+}
+.register-countries h2 {
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+.register-countries ul {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+.register-countries li {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  min-height: 76px;
+  font-size: 14px;
+}
+.register-countries img {
+  width: 72px;
+  height: 62px;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+.register-country-count {
+  font-family: var(--font-ocr), monospace;
+  font-size: 12px;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.register-country-code {
+  font-family: var(--font-ocr), monospace;
+  color: #3d638e;
+  font-size: 20px;
+  padding-left: 15px;
+}
+.register-country-note,
+.register-empty {
+  color: var(--register-muted);
+  font-size: 12px;
+  line-height: 1.8;
+  margin-top: 12px;
+}
+.register-tools {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: max-content;
+  margin: 0 auto;
+  padding: 5px;
+  background: #232326;
+  border-radius: 12px;
+}
+.register-tools > span {
+  color: #b5b5bd;
+  font-size: 12px;
+  padding: 0 15px;
+}
+.register-tools button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 44px;
+  height: 44px;
+  padding: 0 13px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+.register-tools button:hover:not(:disabled) {
+  background: #343439;
+}
+.register-tools button[aria-pressed="true"] {
+  background: #3b334d;
+  color: #e2d5ff;
+}
+.register-tools button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.register-method {
+  max-width: 76ch;
+  margin: 22px auto 0;
+  text-align: center;
+  font-size: 11px;
+  line-height: 1.8;
+  color: #b5b5bd;
+}
+.register-unavailable {
+  margin-top: 75px;
+  max-width: 30ch;
+}
+.register-unavailable h2 {
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 1.3;
+}
+.register-unavailable p {
+  margin-top: 20px;
+  color: var(--register-muted);
+  font-size: 14px;
+  line-height: 1.8;
+}
+.register-unavailable button {
+  margin-top: 20px;
+  min-height: 44px;
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+.register-uv .register-leaf {
+  background-color: #e2dbe9;
+}
+.register-uv .register-visa-origin {
+  color: var(--register-uv);
+}
+.register-uv .register-visa::after {
+  opacity: 0.8;
+}
+.register-site button:focus-visible,
+.register-site a:focus-visible {
+  outline: 2px solid #d3c9ec;
+  outline-offset: 5px;
+}
+.register-book button:focus-visible {
+  outline-color: #593c77;
+}
+.register-book ::selection {
+  background: #bda8bf;
+  color: #261f2d;
+}
+.register-refreshing {
+  animation: register-refresh 1s linear infinite;
+}
+@keyframes register-refresh {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (min-width: 1500px) {
+  .register-book {
+    margin-top: 38px;
+  }
+}
+@media (min-width: 681px) and (max-width: 1000px) {
+  .register-site {
+    padding-right: 22px;
+    padding-left: 22px;
+  }
+  .register-leaf {
+    padding-right: 26px;
+    padding-left: 26px;
+  }
+  .register-leaf-heading {
+    align-items: flex-start;
+  }
+  .register-leaf-heading h1,
+  .register-leaf-heading h2 {
+    font-size: 21px;
+  }
+  .register-leaf-heading p {
+    max-width: 126px;
+    font-size: 11px;
+  }
+  .register-ledger th,
+  .register-ledger td {
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+  .register-visas {
+    gap: 21px 15px;
+  }
+  .register-visa {
+    height: 140px;
+  }
+  .register-visa-github {
+    height: 152px;
+  }
+  .register-visa-linkedin,
+  .register-visa-x {
+    height: 120px;
+  }
+  .register-countries li {
+    grid-template-columns: 57px minmax(0, 1fr) auto;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .register-countries img {
+    width: 57px;
+  }
+}
+@media (max-width: 680px) {
+  .register-site {
+    padding: 0 14px 26px;
+  }
+  .register-header {
+    min-height: 80px;
+    gap: 12px;
+  }
+  .register-back {
+    font-size: 11px;
+    gap: 6px;
+  }
+  .register-back svg {
+    display: none;
+  }
+  .register-header .wordmark {
+    font-size: 12px;
+  }
+  .register-book {
+    display: block;
+    max-width: 470px;
+    padding: 7px;
+    border-radius: 19px;
+    margin: 9px auto 22px;
+  }
+  .register-leaf {
+    min-height: auto;
+    padding: 27px 23px 57px;
+  }
+  .register-passages {
+    border-radius: 13px 13px 5px 5px;
+    margin-bottom: 7px;
+  }
+  .register-destinations {
+    border-radius: 5px 5px 13px 13px;
+  }
+  .register-leaf::after {
+    background: linear-gradient(90deg, #fff1, transparent 90%, #60434313);
+  }
+  .register-leaf-heading {
+    gap: 10px;
+  }
+  .register-leaf-heading h1,
+  .register-leaf-heading h2 {
+    font-size: 21px;
+  }
+  .register-leaf-heading p {
+    font-size: 10px;
+    max-width: 135px;
+  }
+  .register-ledger {
+    margin-top: 28px;
+    font-size: 14px;
+  }
+  .register-ledger th,
+  .register-ledger td {
+    padding: 17px 7px;
+  }
+  .register-ledger tbody td {
+    font-size: 15px;
+  }
+  .register-ledger tfoot td {
+    font-size: 12px;
+  }
+  .register-ledger th:first-child {
+    width: 40%;
+  }
+  .register-visas {
+    gap: 20px 12px;
+    padding-top: 28px;
+  }
+  .register-visa {
+    height: 136px;
+  }
+  .register-visa strong {
+    font-size: 18px;
+  }
+  .register-visa-github {
+    height: 146px;
+  }
+  .register-visa-linkedin,
+  .register-visa-x {
+    height: 120px;
+  }
+  .register-visa-count {
+    font-size: 13px;
+  }
+  .register-visa-origin {
+    font-size: 9px;
+  }
+  .register-visa-origin > span {
+    gap: 7px;
+  }
+  .register-countries li {
+    grid-template-columns: 58px minmax(0, 1fr) auto;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .register-countries img {
+    width: 58px;
+  }
+  .register-country-count {
+    font-size: 11px;
+  }
+  .register-tools {
+    position: sticky;
+    bottom: 16px;
+    z-index: 3;
+    box-shadow: 0 6px 16px #0004;
+  }
+  .register-method {
+    padding: 0 7px;
+    font-size: 10px;
+    text-align: left;
+  }
+  .register-unavailable {
+    margin: 45px 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .register-site *,
+  .register-site *::before,
+  .register-site *::after {
+    animation: none;
+    transition: none;
+  }
+}
+
+.register-country-art {
+  display: block;
+  width: 72px;
+  height: 62px;
+  background-image: radial-gradient(circle, #315f9b 1.3px, transparent 1.5px);
+  background-size: 4px 4px;
+  mask-size: contain;
+  mask-position: center;
+  mask-repeat: no-repeat;
+}
+.register-visa-count,
+.register-visa-origin b {
+  overflow-wrap: anywhere;
+}
+.register-visa:disabled .register-visa-count {
+  font-size: 11px;
+}
+@media (max-width: 1000px) {
+  .register-country-art {
+    width: 58px;
+  }
+}
+
+@media (max-width: 680px) {
+  .register-ledger th:first-child {
+    width: 34%;
+  }
+  .register-ledger tbody td.register-long-number {
+    font-size: 12px;
+  }
+}

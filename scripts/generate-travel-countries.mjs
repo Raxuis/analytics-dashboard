@@ -6,6 +6,7 @@ const response = await fetch(source);
 if (!response.ok) throw new Error(`Natural Earth: ${response.status}`);
 const data = await response.json();
 const catalog = {};
+const iso2 = {};
 await fs.mkdir("public/identity/countries", { recursive: true });
 function project(rings, rect = { x: 30, y: 30, width: 940, height: 940 }) {
   // Put the dateline through the largest empty longitude interval, not through the country.
@@ -60,6 +61,8 @@ function project(rings, rect = { x: 30, y: 30, width: 940, height: 940 }) {
 
 for (const feature of data.features) {
   const code = feature.properties.ADM0_A3;
+  const region = feature.properties.ISO_A2_EH || feature.properties.ISO_A2;
+  if (/^[A-Z]{2}$/.test(region)) iso2[region] = code;
   const polygons =
     feature.geometry.type === "Polygon"
       ? [feature.geometry.coordinates]
@@ -103,3 +106,8 @@ await fs.writeFile(
     "\n",
 );
 console.log(`Prepared ${Object.keys(catalog).length} country silhouettes.`);
+
+await fs.writeFile(
+  "src/components/passport/country-iso2.json",
+  JSON.stringify(iso2, null, 2) + "\n",
+);

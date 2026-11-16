@@ -47,3 +47,7 @@ La page d’accueil suit désormais la direction confirmée : le passeport centr
 ## Contribuer au passeport
 
 Les voyages et les villes se modifient dans `src/components/passport/travel-content.ts`. Les pages se créent automatiquement. 177 silhouettes de pays sont déjà préparées. Voir [le guide de contribution](docs/passport-contributing.md) et [les codes pays](docs/passport-countries.md).
+
+## Registre des passages
+
+La page `/analytics` présente les sept derniers jours dans un registre HTML accessible. Les visas montrent les clics par destination ; un clic sur un visa ou le bouton UV révèle leur origine entre passeport et menu Liens. Actualiser recharge les données sans quitter le registre. Les jours suivent UTC, les compteurs restent réels et les pannes ne sont pas remplacées par des zéros. Les silhouettes des pays réutilisent les assets du passeport ; un pays sans silhouette conserve son nom et son code. Sur téléphone, les deux feuilles sont empilées.
