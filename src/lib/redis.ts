@@ -9,6 +9,8 @@ export class AnalyticsUnavailable extends Error {
 type RedisEnvironment = {
   REDIS_URL?: string;
   REDIS_KEY?: string;
+  KV_REST_API_URL?: string;
+  KV_REST_API_TOKEN?: string;
   UPSTASH_REDIS_REST_URL?: string;
   UPSTASH_REDIS_REST_TOKEN?: string;
 };
@@ -19,12 +21,16 @@ type Options = { timeoutMs?: number; fetch?: typeof fetch };
 // Never send a standard Upstash token to this historical database by guessing its URL.
 const LEGACY_REDIS_URL = "https://eu2-handy-ghoul-31376.upstash.io";
 function resolveConfiguration(env: RedisEnvironment) {
-  const legacyKeyOnly = Boolean(env.REDIS_KEY && !env.UPSTASH_REDIS_REST_TOKEN);
+  const legacyKeyOnly = Boolean(
+    env.REDIS_KEY && !env.UPSTASH_REDIS_REST_TOKEN && !env.KV_REST_API_TOKEN,
+  );
   const rawUrl =
     env.UPSTASH_REDIS_REST_URL ||
+    env.KV_REST_API_URL ||
     env.REDIS_URL ||
     (legacyKeyOnly ? LEGACY_REDIS_URL : undefined);
-  const token = env.UPSTASH_REDIS_REST_TOKEN || env.REDIS_KEY;
+  const token =
+    env.UPSTASH_REDIS_REST_TOKEN || env.KV_REST_API_TOKEN || env.REDIS_KEY;
   if (!rawUrl || !token)
     throw new AnalyticsUnavailable("Redis configuration is missing");
   let url: URL;
@@ -112,6 +118,8 @@ export type RedisClient = ReturnType<typeof createRedis>;
 const environment = (): RedisEnvironment => ({
   REDIS_URL: process.env.REDIS_URL,
   REDIS_KEY: process.env.REDIS_KEY,
+  KV_REST_API_URL: process.env.KV_REST_API_URL,
+  KV_REST_API_TOKEN: process.env.KV_REST_API_TOKEN,
   UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
   UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
 });

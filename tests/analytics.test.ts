@@ -241,3 +241,36 @@ test("explicit URLs take priority over the legacy endpoint and require HTTPS", a
     AnalyticsUnavailable,
   );
 });
+
+test("Vercel Marketplace uses its REST credentials ahead of native Redis and legacy keys", async () => {
+  let target = "",
+    authorization = "";
+  const redis = createRedis(
+    {
+      KV_REST_API_URL: "https://marketplace.upstash.io",
+      KV_REST_API_TOKEN: "marketplace-test-token",
+      REDIS_URL: "rediss://native.upstash.io:6379",
+      REDIS_KEY: "obsolete-test-token",
+    },
+    {
+      fetch: (async (url, init) => {
+        target = String(url);
+        authorization = new Headers(init?.headers).get("Authorization") ?? "";
+        return response([]);
+      }) as typeof fetch,
+    },
+  );
+  await redis.hgetall("key");
+  assert.equal(target, "https://marketplace.upstash.io");
+  assert.equal(authorization, "Bearer marketplace-test-token");
+});
+
+test("Marketplace token without an endpoint never uses the old database", () => {
+  assert.equal(
+    isAnalyticsConfigured({
+      KV_REST_API_TOKEN: "test-token",
+      REDIS_KEY: "obsolete-test-token",
+    }),
+    false,
+  );
+});
