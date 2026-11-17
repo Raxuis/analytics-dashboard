@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element -- Native local images keep the non-WebGL document independent of the canvas loader. */
 import React, { useState } from "react";
+import { CountryFlag } from "./CountryFlag";
 import { identityMachineLines } from "./identity-data";
 import {
   travelPages,
@@ -133,7 +134,7 @@ function TravelPage({
         </div>
       )}
       <div className="simple-travel-sticker">
-        <h3>{countryName(memory.country)}</h3>
+        <h3 className="country-name"><CountryFlag code={memory.country} />{countryName(memory.country)}</h3>
         <p>
           {memory.visits
             ? `${memory.visits} ${memory.visits === 1 ? "visite" : "visites"}`

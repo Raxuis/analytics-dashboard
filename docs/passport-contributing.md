@@ -69,3 +69,7 @@ En 3D, active **UV**, puis déplace la souris ou glisse le doigt sur le papier. 
 ### Lecture sur téléphone
 
 Le lecteur plein écran utilise les mêmes données que le passeport et la vue simple. Il présente l’identité, les visas puis une page par pays. L’ajout d’un voyage met automatiquement à jour le nombre de pages et la navigation du lecteur, sans modifier `PassportReader.tsx`. Les clics sur ses visas sont comptés comme des clics depuis le passeport.
+
+## Drapeaux
+
+Les drapeaux sont des SVG locaux au format 4:3, issus de `flag-icons` sous licence MIT. Le code pays utilisé par les voyages suffit : la correspondance alpha-3 vers alpha-2 est automatique. Les 271 assets sont préparés dans `public/identity/flags` et se régénèrent avec `npm run flags:generate`. Aucun emoji ni service externe au chargement. Les drapeaux accompagnent le nom sans le remplacer, et sont décoratifs pour les lecteurs d’écran.

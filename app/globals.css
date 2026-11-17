@@ -1060,3 +1060,20 @@ p {
     padding: 0;
   }
 }
+
+/* Local vector flags share a fixed 4:3 footprint beside the printed name. */
+.country-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+.country-flag {
+  display: inline-block;
+  width: 24px;
+  height: 18px;
+  flex: 0 0 24px;
+  object-fit: contain;
+  border-radius: 1px;
+  outline: 1px solid #39374726;
+}

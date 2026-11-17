@@ -8,6 +8,7 @@ import type { AnalyticsSummary } from "@/utils/analytics";
 import { destinations } from "./passport/destinations";
 import { visaAccents, visaPapers } from "./passport/passport-layout";
 import isoCountries from "./passport/country-iso2.json";
+import { CountryFlag } from "./passport/CountryFlag";
 
 const numbers = new Intl.NumberFormat("fr-FR");
 const countryNames = new Intl.DisplayNames(["fr"], { type: "region" });
@@ -239,7 +240,7 @@ export default function AnalyticsDashboard({
                           {code}
                         </span>
                       )}
-                      <span>{name}</span>
+                      <span className="country-name"><CountryFlag code={code} />{name}</span>
                       <span className="register-country-count">
                         {count(views, "vue")}
                       </span>

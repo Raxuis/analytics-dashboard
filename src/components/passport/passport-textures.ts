@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { countryFlag } from "./country-flags";
 import { identityMachineLines } from "./identity-data";
 import { TRAVEL_MAP, cityMarkers } from "./travel-layout";
 import { travelPages, countryName, type TravelMemory } from "./travel-content";
@@ -203,6 +204,7 @@ function travelVignette(
   h: number,
   angle: number,
   tint: string,
+  flag?: HTMLImageElement,
 ) {
   c.save();
   c.translate(x, y);
@@ -236,17 +238,23 @@ function travelVignette(
   c.strokeStyle = tint + "8c";
   c.lineWidth = 1.5;
   c.strokeRect(10, 10, w - 20, h - 20);
+  if (flag) {
+    c.drawImage(flag, 25, 23, 40, 30);
+    c.strokeStyle = tint + "40";
+    c.lineWidth = 0.7;
+    c.strokeRect(25, 23, 40, 30);
+  }
   text(
     c,
     countryName(memory.country).toLocaleUpperCase("fr"),
-    25,
+    flag ? 79 : 25,
     47,
     Math.min(32, w * 0.072),
     tint,
     "DM Sans",
     "left",
     700,
-    w - 50,
+    w - (flag ? 104 : 50),
   );
   text(c, "VOYAGES PERSONNELS", 25, 109, 17, tint, "DM Sans", "left", 500);
   if (memory.visits)
@@ -325,6 +333,7 @@ export async function loadPassportTextures(
     ...new Set(travelPages.map((p) => p.memory.country)),
   ];
   const countryImages = new Map<string, HTMLImageElement>();
+  const flagImages = new Map<string, HTMLImageElement>();
   const loaded = () => progress((++done / (3 + uniqueCountries.length)) * 100);
   const [portrait, crest] = await Promise.all([
     image("/avatar.jpg").then((v) => {
@@ -337,7 +346,15 @@ export async function loadPassportTextures(
     }),
     Promise.all(
       uniqueCountries.map(async (code) => {
-        countryImages.set(code, await image(`/identity/countries/${code}.svg`));
+        const flag = countryFlag(code);
+        await Promise.all([
+          image(`/identity/countries/${code}.svg`).then((value) =>
+            countryImages.set(code, value),
+          ),
+          flag
+            ? image(flag).then((value) => flagImages.set(code, value)).catch(() => undefined)
+            : Promise.resolve(),
+        ]);
         loaded();
       }),
     ),
@@ -501,6 +518,7 @@ export async function loadPassportTextures(
       page.memory.places ? 285 : 260,
       -0.025,
       "#314c79",
+      flagImages.get(page.memory.country),
     );
     // Stipple-weight ripples are fixed on the paper, not a looping animation.
     for (const marker of cityMarkers(page.memory)) {
