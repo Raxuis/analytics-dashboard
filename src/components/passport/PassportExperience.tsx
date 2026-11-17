@@ -1,6 +1,6 @@
 "use client";
 import dynamic from "next/dynamic";
-import { spreadCount } from "./travel-content";
+import { spreadCount, travelPages } from "./travel-content";
 import type { CityMarker } from "./travel-layout";
 import Image from "next/image";
 import {
@@ -29,6 +29,7 @@ import {
   type DestinationId,
 } from "./destinations";
 
+import { usePassportDiscovery } from "./usePassportDiscovery";
 import { PassportReader } from "./PassportReader";
 import { SimplePassport } from "./SimplePassport";
 
@@ -76,6 +77,8 @@ export default function PassportExperience() {
   const [reduced, setReduced] = useState(false),
     [mounted, setMounted] = useState(false),
     [simpleMode, setSimpleMode] = useState(false);
+  const [exploredCity, setExploredCity] = useState(false);
+  const [coarsePointer, setCoarsePointer] = useState(false);
   const [readingIndex, setReadingIndex] = useState<number | null>(null);
   const readerButton = useRef<HTMLButtonElement>(null);
   const readerFocusPending = useRef(false);
@@ -97,8 +100,10 @@ export default function PassportExperience() {
     }
   }, []);
   const onCity = useCallback(
-    (value: (CityMarker & { clientX: number; clientY: number }) | null) =>
-      setCity(value),
+    (value: (CityMarker & { clientX: number; clientY: number }) | null) => {
+      setCity(value);
+      if (value) setExploredCity(true);
+    },
     [],
   );
   const onTurn = useCallback((value: number) => {
@@ -108,6 +113,19 @@ export default function PassportExperience() {
   }, []);
   const [selected, setSelected] = useState<DestinationId | null>(null),
     [showLinks, setShowLinks] = useState(false);
+  const discovery = usePassportDiscovery({
+    ready: ready && !failed && !simpleMode,
+    open, page, exploredCity, uv,
+    hasCities: travelPages.slice((page - 1) * 2, page * 2).some(({ memory }) => !!memory.cities?.length),
+    paused: turning || (open && page >= spreadCount) || showLinks || !!selected || readingIndex !== null || !!city || uv,
+  });
+  const discoveryText = discovery.cue === "cover"
+    ? coarsePointer ? "Touchez la couverture pour ouvrir le passeport." : "Cliquez sur la couverture pour ouvrir le passeport."
+    : discovery.cue === "turn"
+      ? "Faites glisser les pages pour les tourner."
+      : discovery.cue === "city"
+        ? coarsePointer ? "Touchez une ville pour la découvrir." : "Survolez une ville pour la découvrir."
+        : "Activez UV pour révéler les souvenirs cachés.";
   const menuButton = useRef<HTMLButtonElement>(null),
     menu = useRef<HTMLElement>(null),
     peekLink = useRef<HTMLAnchorElement>(null);
@@ -128,6 +146,7 @@ export default function PassportExperience() {
     const change = () => setReduced(media.matches);
     change();
     media.addEventListener("change", change);
+    setCoarsePointer(matchMedia("(pointer: coarse)").matches);
     setMounted(true);
     return () => media.removeEventListener("change", change);
   }, []);
@@ -257,6 +276,8 @@ export default function PassportExperience() {
                 uvFull={uvFull}
                 reduced={reduced}
                 selected={selected}
+                discovery={discovery.cue}
+                onDiscoveryInteraction={discovery.dismiss}
                 onOpen={onOpen}
                 onClose={close}
                 onSelect={onSelect}
@@ -292,6 +313,14 @@ export default function PassportExperience() {
           />
         )}
       </section>
+      {discovery.cue && (
+        <div className="discovery-note" role="status" key={discovery.cue}>
+          <span>{discoveryText}</span>
+          <button onClick={discovery.dismiss} aria-label="Masquer cette indication">
+            <X size={14} aria-hidden="true" />
+          </button>
+        </div>
+      )}
       {ready && !failed && !simpleMode && (
         <div
           className="document-controls"

@@ -3,6 +3,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, ThreeEvent, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import gsap from "gsap";
+import { DiscoveryMotion } from "./DiscoveryMotion";
+import type { DiscoveryCue } from "./discovery-state";
 import {
   loadPassportTextures,
   visaHighlight,
@@ -47,6 +49,8 @@ export type SceneProps = {
   uvFull: boolean;
   reduced: boolean;
   selected: DestinationId | null;
+  discovery: DiscoveryCue | null;
+  onDiscoveryInteraction: () => void;
   onOpen: () => void;
   onClose: () => void;
   onSelect: (id: DestinationId) => void;
@@ -183,6 +187,8 @@ function Document({
   uvFull,
   reduced,
   selected,
+  discovery,
+  onDiscoveryInteraction,
   onOpen,
   onClose,
   onSelect,
@@ -678,6 +684,7 @@ function Document({
       ? destinationAtUV(0, e.uv.x, e.uv.y)
       : null;
   const begin = (e: ThreeEvent<PointerEvent>) => {
+    onDiscoveryInteraction();
     suppressClick.current = false;
     lightAt(e);
     if (turn || coverMoving.current) return;
@@ -786,6 +793,7 @@ function Document({
         position={[-PW / 2, 0, 0]}
         rotation={[-0.09, -0.12, -0.105]}
       >
+        <DiscoveryMotion cue={discovery} reduced={reduced} cover={hinge} paper={stationary} page={displayed} />
         <group ref={backHinge} position={[0, 0, REAR_COVER_HINGE_Z]}>
           <group position={[0, 0, -REAR_COVER_HINGE_Z]}>
             <mesh

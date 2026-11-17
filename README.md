@@ -63,3 +63,7 @@ L’identité publique et les métadonnées sont dans `src/lib/site.ts`. `npm ru
 Sur petit écran, le bouton **Lire** ouvre une seule page HTML en grand, avec navigation entre les pages, souvenirs UV et liens accessibles. Le retour ou la touche Échap ramène à la double page correspondante, puis restaure le focus après sa transition. Les couvertures et les feuilles suivent le glissement et peuvent revenir à leur position initiale avant relâchement. Une annulation ou une perte de focus ne valide pas le geste.
 
 Le suivi de la passe de finition est dans [docs/passport-polish.md](docs/passport-polish.md). Le contenu personnel reste à compléter manuellement dans les données existantes.
+
+## Première visite
+
+Le passeport propose des indices contextuels pour ouvrir la couverture, glisser les pages, explorer une ville et utiliser l’UV. Chaque indice est mémorisé sous `raxuis.passport.discovery.v1` dans le stockage local ; les visiteurs qui trouvent un geste seuls ne reçoivent pas son explication. Les mouvements restent courts, annulables et sans boucle ; la préférence de réduction des animations conserve le texte. Les règles sont dans `discovery-state.ts`, le timing dans `usePassportDiscovery.ts` et les effets 3D dans `DiscoveryMotion.tsx`.

@@ -24,3 +24,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 ## Finition du 17 novembre 2026
 
 Les couvertures suivent le geste et peuvent revenir à leur position initiale avant relâchement. Les encres plus sombres, fibres fines et couture restent confinées au document. Sur mobile, « Lire » ouvre une seule page dans un dialogue natif avec navigation, UV et retour à la double page correspondante. Le lecteur reprend les données existantes sans contenu personnel supplémentaire. Partage : adresse canonique passeport.raphaelraclot.dev et composition native du blason original sur couverture bordeaux.
+
+## Découverte initiale
+
+Une seule démonstration brève par geste : couverture légèrement soulevée, coin de page courbé, onde sur une ville réelle. Les indications textuelles sont contextualisées et mémorisées séparément. Le visiteur garde la main, les mouvements ne tournent aucune page et sont interrompus au toucher ou au clic. Les overlays et transitions suspendent les indices ; Reduce Motion conserve uniquement le texte.

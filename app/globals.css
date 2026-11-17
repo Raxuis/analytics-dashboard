@@ -1077,3 +1077,39 @@ p {
   border-radius: 1px;
   outline: 1px solid #39374726;
 }
+
+.discovery-note {
+  position: fixed;
+  z-index: 8;
+  bottom: 104px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  padding: 2px 4px 2px 14px;
+  border-radius: 8px;
+  background: #242428;
+  color: #e2e2e7;
+  font-size: 13px;
+  line-height: 1.5;
+  animation: discovery-appear 180ms ease-out;
+}
+.discovery-note button {
+  display: grid;
+  place-items: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  color: inherit;
+  border-radius: 5px;
+}
+.discovery-note button:hover { background: #323237; }
+.discovery-note button:active { background: #414147; }
+.discovery-note button:focus-visible { outline: 2px solid #e2e2e7; outline-offset: -4px; }
+@keyframes discovery-appear { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .discovery-note { animation: none; }
+}
