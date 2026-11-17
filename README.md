@@ -22,7 +22,7 @@ npm start
 
 ## Identité
 
-Le R d’origine est conservé dans `public/identity/raxuis-logo.png`. Le favicon SVG adapte exactement sa silhouette en dorure sur une couverture bordeaux. `npm run icons` régénère l’emblème personnel, puis génère le favicon ICO aux tailles 16, 32 et 48 pixels, l’icône Apple et un aperçu PNG.
+Le R d’origine est conservé dans `public/identity/raxuis-logo.png`. Le favicon SVG adapte exactement sa silhouette en dorure sur une couverture bordeaux. `npm run icons` régénère l’emblème de couverture, puis génère le favicon ICO aux tailles 16, 32 et 48 pixels, l’icône Apple et un aperçu PNG.
 
 Les polices DM Sans et Space Grotesk sont distribuées localement avec leurs licences dans `public/fonts`. Le texte, les destinations et la mesure des clics sont définis dans `src/components/passport/destinations.ts`. Les matières imprimées sont dans `passport-textures.ts`; la géométrie, les shaders et les animations sont dans `PassportScene.tsx`.
 
@@ -56,7 +56,7 @@ La page `/analytics` présente les sept derniers jours dans un registre HTML acc
 
 Adresse publique dédiée : https://passeport.raphaelraclot.dev. Le domaine reste géré chez Porkbun ; seul le CNAME `passeport` pointe vers le projet Vercel du passeport. Le domaine principal du portfolio conserve sa configuration.
 
-L’identité publique et les métadonnées sont dans `src/lib/site.ts`. `npm run social:generate` recrée l’image Open Graph et Twitter de 1200 × 630 dans `public/social/passport.png`, à partir du blason original et de la police locale. `npm run icons` produit le favicon à plusieurs tailles ; la version 16 pixels utilise un R simplifié, les grandes tailles conservent les détails du passeport.
+L’identité publique et les métadonnées sont dans `src/lib/site.ts`. `npm run social:generate` recrée l’image Open Graph et Twitter de 1200 × 630 dans `public/social/passport.png`, à partir de l’emblème vectoriel de couverture et de la police locale. `npm run icons` produit le favicon à plusieurs tailles ; la version 16 pixels utilise un R simplifié, les grandes tailles conservent les détails du passeport.
 
 ## Lecture et finition
 

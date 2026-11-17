@@ -28,3 +28,7 @@ Les couvertures suivent le geste et peuvent revenir à leur position initiale av
 ## Découverte initiale
 
 Une seule démonstration brève par geste : couverture légèrement soulevée, coin de page courbé, onde sur une ville réelle. Les indications textuelles sont contextualisées et mémorisées séparément. Le visiteur garde la main, les mouvements ne tournent aucune page et sont interrompus au toucher ou au clic. Les overlays et transitions suspendent les indices ; Reduce Motion conserve uniquement le texte.
+
+## Couverture du 17 novembre 2026
+
+À la demande de Raphaël, le grand R personnel sur la couverture est remplacé par une adaptation vectorielle de l’emblème du passeport français. La composition conserve son nom et le cuir bordeaux. Le mot PASSEPORT est souligné. Le header et le favicon gardent le logo personnel. Source et licence CC BY-SA 4.0 : public/identity/sources/ATTRIBUTION.md. L’aperçu de partage suit la nouvelle couverture.

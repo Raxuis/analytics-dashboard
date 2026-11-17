@@ -388,7 +388,7 @@ export async function loadPassportTextures(
     c.fillStyle = i % 2 ? "#d6a8af0b" : "#08000a1c";
     c.fillRect(x, y, 1.5, 1.5);
   }
-  // A separate alpha mask puts all lettering and the personal crest in metallic foil.
+  // A separate alpha mask puts all lettering and the French-inspired vector emblem in metallic foil.
   const foil = canvas();
   text(
     foil.c,
@@ -401,7 +401,7 @@ export async function loadPassportTextures(
     "center",
   );
   text(foil.c, "Raxuis", W / 2, 250, 41, "#ffffff", "DM Sans", "center");
-  foil.c.drawImage(crest, 232, 424, 560, 560);
+  foil.c.drawImage(crest, 260, 435, 504, 536);
   text(
     foil.c,
     "PASSEPORT",
@@ -414,6 +414,11 @@ export async function loadPassportTextures(
     600,
   );
   foil.c.strokeStyle = "#ffffff";
+  foil.c.lineWidth = 3;
+  foil.c.beginPath();
+  foil.c.moveTo(W / 2 - 165, 1211);
+  foil.c.lineTo(W / 2 + 165, 1211);
+  foil.c.stroke();
   foil.c.lineWidth = 4;
   foil.c.beginPath();
   foil.c.roundRect(W / 2 - 43, 1246, 86, 52, 2);
