@@ -27,7 +27,7 @@ Passe demandée le 16 novembre 2026. Direction conservée : le passeport au cent
 ## Vérification et publication
 - [x] Tests des gestes, des limites de pages et des métadonnées.
 - [x] Vérifications visuelles ordinateur et petits écrans, chargement, erreur et mode simple.
-- [ ] Revue finale, commits progressifs et contrôle en production.
+- [x] Revue finale, commits progressifs et contrôle en production.
 
 ## Contenu à remplir plus tard par Raphaël
 
@@ -36,3 +36,7 @@ Le fichier `src/components/passport/travel-content.ts` reste la source des voyag
 ## Vérifications locales
 
 17 novembre 2026 : 33 tests passent, lint et TypeScript valides, build de production réussi. Contrôles réels à 1280, 390 et 320 pixels : gestes annulables, couvertures, limites du lecteur, souvenir UV de Tokyo, défilement des villes et retour du focus. Le détecteur ne relève aucun défaut principal ; ses remarques de palette concernent les encres et papiers du document conservé.
+
+## Livraison
+
+Revue finale : **ship**, aucun défaut matériel relevé. Commits fonctionnels `1d5f282` et `a497f4d`, publiés sur `main`. Vercel confirme le déploiement `dpl_BPWBYqWxpSEveMtPeyt9Tc2qEzin` prêt. Le 17 novembre 2026, contrôles sur le domaine dédié : accueil et registre HTTP 200, canonique correct, image 1200 × 630 HTTP 200, favicon à trois tailles HTTP 200, collecte de clic HTTP 204. Le lecteur mobile publié, le portrait et le retour vers le passeport ont été vérifiés dans le navigateur. Aucun nouveau contenu personnel ajouté.

@@ -38,9 +38,9 @@ Ce tableau de bord reste public, comme dans le dépôt d’origine, et n’est p
 
 ## Choix et validation
 
-La conception validée et le plan figurent dans `docs/superpowers`. Aucun déploiement automatique n’est effectué par ce projet. Les tests couvrent le délai réel d’annulation des appels Redis, la compatibilité de configuration, les erreurs de stockage, l’agrégation et la validation de l’endpoint.
+La conception validée et le plan figurent dans `docs/superpowers`. La branche `main` est déployée automatiquement par l’intégration GitHub de Vercel. Les tests couvrent le délai réel d’annulation des appels Redis, la compatibilité de configuration, les erreurs de stockage, l’agrégation et la validation de l’endpoint.
 
-Le diagnostic du 504 en production est consigné dans `docs/superpowers/specs/2026-11-12-analytics-diagnosis.md`. L’ancien endpoint ne résout actuellement plus dans le DNS; sa compatibilité de configuration ne rétablit donc pas les statistiques.
+Le diagnostic du 504 en production est consigné dans `docs/superpowers/specs/2026-11-12-analytics-diagnosis.md`. L’ancien endpoint ne résout plus dans le DNS. Une nouvelle base Upstash gratuite est maintenant reliée au projet Vercel en production ; ses variables REST `KV_REST_API_URL` et `KV_REST_API_TOKEN` sont prioritaires sur les anciennes variables.
 
 La page d’accueil suit désormais la direction confirmée : le passeport centré, presque seul, des commandes discrètes et un panneau de liens. `PRODUCT.md`, `DESIGN.md` et `.impeccable/surfaces/app-page-tsx.md` consignent cette décision. Aucun habillage éditorial, slogan ou texte d’ambiance ne doit être réintroduit.
 
