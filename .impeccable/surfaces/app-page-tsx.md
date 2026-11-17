@@ -20,3 +20,7 @@ FIRST VIEWPORT: Full viewport. Original R mark and a small Raxuis label at top l
 FORM: seed: none (pinned). User direction: « Le passeport au centre, presque seul, avec quelques commandes discrètes ». The user explicitly delegated choice and execution; build directly in code using the approved existing 3D object.
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+
+## Finition du 17 novembre 2026
+
+Les couvertures suivent le geste et peuvent revenir à leur position initiale avant relâchement. Les encres plus sombres, fibres fines et couture restent confinées au document. Sur mobile, « Lire » ouvre une seule page dans un dialogue natif avec navigation, UV et retour à la double page correspondante. Le lecteur reprend les données existantes sans contenu personnel supplémentaire. Partage : adresse canonique passeport.raphaelraclot.dev et composition native du blason original sur couverture bordeaux.

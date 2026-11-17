@@ -3,9 +3,15 @@ import sharp from "sharp";
 
 // The SVG masks the original logo, retaining its exact silhouette.
 const source = await fs.readFile("public/icon.svg");
+const smallSource = await fs.readFile("public/identity/favicon-small.svg");
 const sizes = [16, 32, 48];
 const pngs = await Promise.all(
-  sizes.map((size) => sharp(source).resize(size, size).png().toBuffer()),
+  sizes.map((size) =>
+    sharp(size === 16 ? smallSource : source)
+      .resize(size, size)
+      .png()
+      .toBuffer(),
+  ),
 );
 const header = Buffer.alloc(6 + sizes.length * 16);
 header.writeUInt16LE(1, 2);

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { site } from "@/lib/site";
 
 const sans = localFont({
   src: "../public/fonts/dm-sans.ttf",
@@ -18,10 +19,9 @@ const ocr = localFont({
   display: "swap",
 });
 export const metadata: Metadata = {
-  metadataBase: new URL("https://raxuis.vercel.app"),
-  title: "Raxuis · Raphaël Raclot",
-  description:
-    "Raphaël Raclot, développeur web. Mon portfolio, mon code et quelques façons de se retrouver.",
+  metadataBase: new URL(site.url),
+  title: site.title,
+  description: site.description,
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "16x16 32x32 48x48" },
@@ -30,10 +30,19 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
   },
   openGraph: {
-    title: "Raxuis · Raphaël Raclot",
-    description: "Un passeport vers mes projets et mon univers.",
+    title: site.title,
+    description: site.description,
+    url: site.url,
+    siteName: "Raxuis",
+    images: [{ url: site.image, width: 1200, height: 630, alt: site.imageAlt }],
     locale: "fr_FR",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: site.title,
+    description: site.description,
+    images: [{ url: site.image, alt: site.imageAlt }],
   },
 };
 export default function RootLayout({

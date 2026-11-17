@@ -65,3 +65,7 @@ Ajoute `uvNote: "Ton souvenir réel en une phrase."` à une ville pour remplacer
 Le même champ `uvNote` sur un pays imprime une courte note cachée sur sa carte. Garde cette note à trois lignes environ. Les marques fluorescentes de séjour viennent automatiquement de `visits`. Sans nombre fourni, la page indique seulement « Visité ».
 
 En 3D, active **UV**, puis déplace la souris ou glisse le doigt sur le papier. Ce glissement sert à la lampe ; les boutons restent disponibles pour tourner les pages. **Tout éclairer** révèle la double page entière et rétablit le glissement des pages. **Lampe** revient à l’éclairage local. En vue simple, **Lumière UV** révèle directement les souvenirs avec les mêmes boutons de villes accessibles au clavier.
+
+### Lecture sur téléphone
+
+Le lecteur plein écran utilise les mêmes données que le passeport et la vue simple. Il présente l’identité, les visas puis une page par pays. L’ajout d’un voyage met automatiquement à jour le nombre de pages et la navigation du lecteur, sans modifier `PassportReader.tsx`. Les clics sur ses visas sont comptés comme des clics depuis le passeport.

@@ -51,3 +51,15 @@ Les voyages et les villes se modifient dans `src/components/passport/travel-cont
 ## Registre des passages
 
 La page `/analytics` présente les sept derniers jours dans un registre HTML accessible. Les visas montrent les clics par destination ; un clic sur un visa ou le bouton UV révèle leur origine entre passeport et menu Liens. Actualiser recharge les données sans quitter le registre. Les jours suivent UTC, les compteurs restent réels et les pannes ne sont pas remplacées par des zéros. Les silhouettes des pays réutilisent les assets du passeport ; un pays sans silhouette conserve son nom et son code. Sur téléphone, les deux feuilles sont empilées.
+
+## Adresse et partage
+
+Adresse publique dédiée : https://passeport.raphaelraclot.dev. Le domaine reste géré chez Porkbun ; seul le CNAME `passeport` pointe vers le projet Vercel du passeport. Le domaine principal du portfolio conserve sa configuration.
+
+L’identité publique et les métadonnées sont dans `src/lib/site.ts`. `npm run social:generate` recrée l’image Open Graph et Twitter de 1200 × 630 dans `public/social/passport.png`, à partir du blason original et de la police locale. `npm run icons` produit le favicon à plusieurs tailles ; la version 16 pixels utilise un R simplifié, les grandes tailles conservent les détails du passeport.
+
+## Lecture et finition
+
+Sur petit écran, le bouton **Lire** ouvre une seule page HTML en grand, avec navigation entre les pages, souvenirs UV et liens accessibles. Le retour ou la touche Échap ramène à la double page correspondante, puis restaure le focus après sa transition. Les couvertures et les feuilles suivent le glissement et peuvent revenir à leur position initiale avant relâchement. Une annulation ou une perte de focus ne valide pas le geste.
+
+Le suivi de la passe de finition est dans [docs/passport-polish.md](docs/passport-polish.md). Le contenu personnel reste à compléter manuellement dans les données existantes.
