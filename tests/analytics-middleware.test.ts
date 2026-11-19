@@ -22,7 +22,7 @@ test("homepage response returns before Redis finishes recording the view", async
       finish = resolve;
     })) as typeof fetch;
   try {
-    const result = middleware(new NextRequest("https://raxuis.test/"), {
+    const result = middleware(new NextRequest("https://raxuis.test/", { headers: { accept: "text/html" } }), {
       waitUntil(promise: Promise<unknown>) {
         background = promise;
       },

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse, type NextFetchEvent } from "next/server";
+import { isPageDocument } from "./src/utils/pageview";
 import { languageFromRequest } from "./src/i18n/routing";
 import { analytics } from "./src/utils/analytics";
 import { isAnalyticsConfigured } from "./src/lib/redis";
@@ -8,7 +9,7 @@ export default function middleware(req: NextRequest, event: NextFetchEvent) {
   const locale = languageFromRequest(req.headers.get("host") ?? req.nextUrl.host, path);
   const requestHeaders = new Headers(req.headers);
   requestHeaders.set("x-passport-locale", locale);
-  if ((path === "/" || path === "/en") && !req.headers.has("next-router-prefetch") && req.headers.get("purpose") !== "prefetch" && isAnalyticsConfigured()) {
+  if ((path === "/" || path === "/en") && isPageDocument(req) && isAnalyticsConfigured()) {
     const country = req.geo?.country;
     event.waitUntil(
       analytics
