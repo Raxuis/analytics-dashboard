@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, ThreeEvent, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
+import type { Locale } from "@/i18n/language";
 import gsap from "gsap";
 import { DiscoveryMotion } from "./DiscoveryMotion";
 import type { DiscoveryCue } from "./discovery-state";
@@ -43,6 +44,7 @@ import {
 } from "./passport-geometry";
 
 export type SceneProps = {
+  locale: Locale;
   open: boolean;
   page: number;
   uv: boolean;
@@ -1018,11 +1020,11 @@ function Scene({
 }
 export default function PassportScene(props: SceneProps) {
   const [textures, setTextures] = useState<PassportTextures | null>(null);
-  const { onError, onProgress } = props;
+  const { onError, onProgress, locale } = props;
   useEffect(() => {
     let alive = true;
     let owned: PassportTextures | undefined;
-    loadPassportTextures(onProgress)
+    loadPassportTextures(onProgress, locale)
       .then((t) => {
         owned = t;
         if (alive) setTextures(t);
@@ -1035,7 +1037,7 @@ export default function PassportScene(props: SceneProps) {
       alive = false;
       owned?.dispose();
     };
-  }, [onError, onProgress]);
+  }, [onError, onProgress, locale]);
   const created = useCallback(({ gl }: { gl: THREE.WebGLRenderer }) => {
     gl.setClearColor(0x000000, 0);
   }, []);

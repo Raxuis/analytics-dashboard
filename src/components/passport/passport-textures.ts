@@ -1,3 +1,4 @@
+import { translate, type Locale } from "@/i18n/language";
 import * as THREE from "three";
 import { countryFlag } from "./country-flags";
 import { identityMachineLines } from "./identity-data";
@@ -28,12 +29,14 @@ export type PassportTextures = {
   environment: THREE.CanvasTexture;
   dispose: () => void;
 };
-function canvas(w = W, h = H) {
+const canvasLocales = new WeakMap<CanvasRenderingContext2D, Locale>();
+function canvas(w = W, h = H, locale: Locale = "fr") {
   const el = document.createElement("canvas");
   el.width = w;
   el.height = h;
   const c = el.getContext("2d");
   if (!c) throw new Error("Canvas indisponible");
+  canvasLocales.set(c, locale);
   return { el, c };
 }
 function texture(el: HTMLCanvasElement, color = true) {
@@ -54,6 +57,7 @@ function text(
   weight = 400,
   maxWidth?: number,
 ) {
+  str = translate(str, canvasLocales.get(c) ?? "fr");
   c.fillStyle = color;
   c.font = `${weight} ${size}px ${font === "monospace" ? "monospace" : `"${font}"`}`;
   c.textAlign = align;
@@ -74,8 +78,8 @@ function line(
   c.lineTo(x + w, y);
   c.stroke();
 }
-function paper(page = 1) {
-  const { el, c } = canvas();
+function paper(page = 1, locale: Locale = "fr") {
+  const { el, c } = canvas(W, H, locale);
   c.fillStyle = "#f2e9df";
   c.fillRect(0, 0, W, H);
   const wash = c.createLinearGradient(0, 0, W, H);
@@ -273,7 +277,7 @@ function travelVignette(
   if (memory.places)
     text(
       c,
-      memory.places.join(", "),
+      memory.places.map((place) => translate(place, canvasLocales.get(c) ?? "fr")).join(", "),
       25,
       215,
       26,
@@ -327,6 +331,7 @@ function image(url: string) {
 }
 export async function loadPassportTextures(
   progress: (n: number) => void,
+  locale: Locale = "fr",
 ): Promise<PassportTextures> {
   let done = 0;
   const uniqueCountries = [
@@ -368,7 +373,7 @@ export async function loadPassportTextures(
       return null;
     }),
   ]);
-  const cover = canvas();
+  const cover = canvas(W, H, locale);
   const c = cover.c;
   c.fillStyle = "#3d0827";
   c.fillRect(0, 0, W, H);
@@ -389,7 +394,7 @@ export async function loadPassportTextures(
     c.fillRect(x, y, 1.5, 1.5);
   }
   // A separate alpha mask puts all lettering and the French-inspired vector emblem in metallic foil.
-  const foil = canvas();
+  const foil = canvas(W, H, locale);
   text(
     foil.c,
     "Raphaël Raclot",
@@ -458,7 +463,7 @@ export async function loadPassportTextures(
   const paperBump = texture(paperGrain.el, false);
   paperBump.wrapS = paperBump.wrapT = THREE.RepeatWrapping;
   paperBump.repeat.set(4, 6);
-  const id = paper(1);
+  const id = paper(1, locale);
   documentHeader(id.c, "");
   // One aligned identity block, with a true portrait crop and a separate machine-readable zone.
   const photoRatio = 319 / 440;
@@ -500,11 +505,11 @@ export async function loadPassportTextures(
       ),
     );
   });
-  const visas = paper(2);
+  const visas = paper(2, locale);
   documentHeader(visas.c, "VISAS");
   PAGE_LINKS[0]!.forEach((r) => printedVisa(visas.c, r));
   const travelSheets = travelPages.map((page, index) => {
-    const sheet = paper(index + 3);
+    const sheet = paper(index + 3, locale);
     documentHeader(sheet.c, "VOYAGES");
     const map = countryImages.get(page.memory.country)!;
     sheet.c.drawImage(
@@ -549,7 +554,7 @@ export async function loadPassportTextures(
   for (let i = 0; i < travelSheets.length; i += 2)
     spreads.push({
       left: travelSheets[i]!,
-      right: travelSheets[i + 1] ?? texture(paper(i + 4).el),
+      right: travelSheets[i + 1] ?? texture(paper(i + 4, locale).el),
     });
   // A separate transparent ink plate keeps memories invisible under ordinary light.
   const uvSheets = [
@@ -557,7 +562,7 @@ export async function loadPassportTextures(
     undefined,
     ...travelPages.map((p) => p.memory),
   ].map((memory) => {
-    const sheet = canvas();
+    const sheet = canvas(W, H, locale);
     const c = sheet.c;
     c.strokeStyle = "#79ffd5";
     c.lineWidth = 1.2;
@@ -610,7 +615,7 @@ export async function loadPassportTextures(
       }
       if (memory.uvNote) {
         c.font = '24px "DM Sans"';
-        const words = memory.uvNote.split(/\s+/);
+        const words = translate(memory.uvNote, locale).split(/\s+/);
         let row = "",
           y = 960;
         for (const word of words) {
@@ -628,7 +633,7 @@ export async function loadPassportTextures(
   });
   const uvSpreads = spreads.map((_, i) => ({
     left: uvSheets[i * 2]!,
-    right: uvSheets[i * 2 + 1] ?? texture(canvas().el, false),
+    right: uvSheets[i * 2 + 1] ?? texture(canvas(W, H, locale).el, false),
   }));
   const env = canvas(512, 256);
   const eg = env.c.createLinearGradient(0, 0, 0, 256);

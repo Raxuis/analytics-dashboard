@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse, type NextFetchEvent } from "next/server";
+import { languageFromRequest } from "./src/i18n/routing";
 import { analytics } from "./src/utils/analytics";
 import { isAnalyticsConfigured } from "./src/lib/redis";
 
 export default function middleware(req: NextRequest, event: NextFetchEvent) {
-  if (isAnalyticsConfigured()) {
+  const path = req.nextUrl.pathname;
+  const locale = languageFromRequest(req.headers.get("host") ?? req.nextUrl.host, path);
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set("x-passport-locale", locale);
+  if ((path === "/" || path === "/en") && !req.headers.has("next-router-prefetch") && req.headers.get("purpose") !== "prefetch" && isAnalyticsConfigured()) {
     const country = req.geo?.country;
     event.waitUntil(
       analytics
@@ -14,17 +19,14 @@ export default function middleware(req: NextRequest, event: NextFetchEvent) {
         .catch(() => console.warn("Pageview storage unavailable")),
     );
   }
-  return NextResponse.next();
+  if (locale === "en" && !path.startsWith("/en")) {
+    const url = req.nextUrl.clone();
+    url.pathname = path === "/" ? "/en" : `/en${path}`;
+    return NextResponse.rewrite(url, { request: { headers: requestHeaders } });
+  }
+  return NextResponse.next({ request: { headers: requestHeaders } });
 }
 
 export const config = {
-  matcher: [
-    {
-      source: "/",
-      missing: [
-        { type: "header", key: "next-router-prefetch" },
-        { type: "header", key: "purpose", value: "prefetch" },
-      ],
-    },
-  ],
+  matcher: ["/", "/en", "/analytics", "/en/analytics"],
 };

@@ -1,4 +1,7 @@
 "use client";
+import { LanguageSwitch } from "@/i18n/LanguageSwitch";
+import { translate, type Locale } from "@/i18n/language";
+import { useLanguage } from "@/i18n/LanguageProvider";
 import React, { useState, useTransition, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -10,40 +13,41 @@ import { visaAccents, visaPapers } from "./passport/passport-layout";
 import isoCountries from "./passport/country-iso2.json";
 import { CountryFlag } from "./passport/CountryFlag";
 
-const numbers = new Intl.NumberFormat("fr-FR");
-const countryNames = new Intl.DisplayNames(["fr"], { type: "region" });
 function dateOf(value: string) {
   const [day, month, year] = value.split("/").map(Number);
   return new Date(Date.UTC(year!, month! - 1, day));
 }
-function shortDate(value: string) {
-  return new Intl.DateTimeFormat("fr-FR", {
+function shortDate(value: string, locale: Locale) {
+  return new Intl.DateTimeFormat(locale === "en" ? "en-GB" : "fr-FR", {
     day: "numeric",
     month: "short",
     timeZone: "UTC",
   }).format(dateOf(value));
 }
-function period(summary: AnalyticsSummary) {
+function period(summary: AnalyticsSummary, locale: Locale) {
   const first = summary.days[0]?.date,
     last = summary.days.at(-1)?.date;
-  if (!first || !last) return "Sept derniers jours";
-  const longDate = new Intl.DateTimeFormat("fr-FR", {
+  if (!first || !last) return translate("Sept derniers jours", locale);
+  const longDate = new Intl.DateTimeFormat(locale === "en" ? "en-GB" : "fr-FR", {
     day: "numeric",
     month: "long",
     year: "numeric",
     timeZone: "UTC",
   });
-  return `${shortDate(first)} au ${longDate.format(dateOf(last))}`;
+  return `${shortDate(first, locale)} ${locale === "en" ? "to" : "au"} ${longDate.format(dateOf(last))}`;
 }
-function count(value: number, noun: string) {
-  return `${numbers.format(value)} ${noun}${value > 1 ? "s" : ""}`;
-}
-
 export default function AnalyticsDashboard({
   summary,
 }: {
   summary: AnalyticsSummary | null;
 }) {
+  const { locale, t } = useLanguage();
+  const numbers = new Intl.NumberFormat(locale === "en" ? "en-GB" : "fr-FR");
+  const countryNames = new Intl.DisplayNames([locale], { type: "region" });
+  const count = (value: number, noun: string) => {
+    const word = locale === "en" ? noun === "vue" ? "view" : "click" : noun;
+    return `${numbers.format(value)} ${word}${(locale === "en" ? value !== 1 : value > 1) ? "s" : ""}`;
+  };
   const [uv, setUv] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [refreshing, startRefresh] = useTransition();
@@ -51,7 +55,7 @@ export default function AnalyticsDashboard({
   return (
     <main className={`register-site ${uv ? "register-uv" : ""}`}>
       <header className="register-header">
-        <Link href="/" className="wordmark" aria-label="Raxuis, accueil">
+        <Link href={locale === "en" ? "/en" : "/"} className="wordmark" aria-label={t("Raxuis, accueil")}>
           <Image
             src="/identity/raxuis-logo.png"
             width={28}
@@ -60,14 +64,14 @@ export default function AnalyticsDashboard({
           />
           <span>Raxuis</span>
         </Link>
-        <Link className="register-back" href="/">
-          <ArrowLeft size={15} />
-          Retour au passeport
-        </Link>
+        <div className="header-actions"><LanguageSwitch />
+        <Link className="register-back" href={locale === "en" ? "/en" : "/"}>
+          <ArrowLeft size={15} />{t("Retour au passeport")}</Link>
+        </div>
       </header>
       <div
         className="register-book"
-        aria-label="Registre des passages de Raxuis"
+        aria-label={t("Registre des passages de Raxuis")}
         aria-busy={refreshing}
       >
         <section
@@ -75,20 +79,18 @@ export default function AnalyticsDashboard({
           aria-labelledby="register-title"
         >
           <div className="register-leaf-heading">
-            <h1 id="register-title">Passages</h1>
-            <p>{summary ? period(summary) : "Sept derniers jours"}</p>
+            <h1 id="register-title">{t("Passages")}</h1>
+            <p>{summary ? period(summary, locale) : t("Sept derniers jours")}</p>
           </div>
           {summary ? (
             <>
               <table className="register-ledger">
-                <caption className="sr-only">
-                  Vues de l’accueil et clics sortants par journée UTC
-                </caption>
+                <caption className="sr-only">{t("Vues de l’accueil et clics sortants par journée UTC")}</caption>
                 <thead>
                   <tr>
                     <th scope="col">Date</th>
-                    <th scope="col">Vues</th>
-                    <th scope="col">Clics</th>
+                    <th scope="col">{t("Vues")}</th>
+                    <th scope="col">{t("Clics")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -105,7 +107,7 @@ export default function AnalyticsDashboard({
                         <time
                           dateTime={dateOf(day.date).toISOString().slice(0, 10)}
                         >
-                          {shortDate(day.date)}
+                          {shortDate(day.date, locale)}
                         </time>
                       </th>
                       <td
@@ -137,22 +139,20 @@ export default function AnalyticsDashboard({
                   </tr>
                 </tfoot>
               </table>
-              <p className="register-timezone">Journées comptées en UTC</p>
+              <p className="register-timezone">{t("Journées comptées en UTC")}</p>
               {summary.totalPageviews === 0 && summary.totalClicks === 0 && (
-                <p className="register-empty">
-                  Aucun passage enregistré sur cette période.
-                </p>
+                <p className="register-empty">{t("Aucun passage enregistré sur cette période.")}</p>
               )}
             </>
           ) : (
             <div className="register-unavailable" role="status">
-              <h2>Le registre est indisponible.</h2>
-              <p>Les passages ne peuvent pas être chargés pour le moment.</p>
+              <h2>{t("Le registre est indisponible.")}</h2>
+              <p>{t("Les passages ne peuvent pas être chargés pour le moment.")}</p>
               <button
                 onClick={() => startRefresh(() => router.refresh())}
                 disabled={refreshing}
               >
-                {refreshing ? "Actualisation…" : "Réessayer"}
+                {refreshing ? t("Actualisation…") : t("Réessayer")}
               </button>
             </div>
           )}
@@ -187,24 +187,22 @@ export default function AnalyticsDashboard({
                   disabled={!stats}
                   aria-expanded={expanded}
                   aria-controls={`register-origin-${d.id}`}
-                  aria-label={`${d.label}, ${stats ? count(stats.count, "clic") : "données indisponibles"}, origine des clics`}
+                  aria-label={`${d.label}, ${stats ? count(stats.count, "clic") : t("données indisponibles")}, ${t("origine des clics")}`}
                   onClick={() => setSelected(selected === d.id ? null : d.id)}
-                  title="Origine des clics"
+                  title={t("Origine des clics")}
                 >
                   <strong>{d.label}</strong>
                   <span className="register-visa-count">
-                    {stats ? count(stats.count, "clic") : "Indisponible"}
+                    {stats ? count(stats.count, "clic") : t("Indisponible")}
                   </span>
                   <span
                     className="register-visa-origin"
                     id={`register-origin-${d.id}`}
                     hidden={!expanded}
                   >
-                    <span>
-                      Passeport <b>{numbers.format(stats?.scene ?? 0)}</b>
+                    <span>{t("Passeport")}<b>{numbers.format(stats?.scene ?? 0)}</b>
                     </span>
-                    <span>
-                      Liens directs <b>{numbers.format(stats?.direct ?? 0)}</b>
+                    <span>{t("Liens directs")}<b>{numbers.format(stats?.direct ?? 0)}</b>
                     </span>
                   </span>
                 </button>
@@ -215,7 +213,7 @@ export default function AnalyticsDashboard({
             className="register-countries"
             aria-labelledby="register-countries-title"
           >
-            <h2 id="register-countries-title">Pays de passage</h2>
+            <h2 id="register-countries-title">{t("Pays de passage")}</h2>
             {summary?.topCountries.length ? (
               <ul>
                 {summary.topCountries.map(([code, views]) => {
@@ -251,13 +249,13 @@ export default function AnalyticsDashboard({
             ) : (
               <p className="register-empty">
                 {summary
-                  ? "Aucun pays renseigné sur cette période."
-                  : "Données indisponibles."}
+                  ? t("Aucun pays renseigné sur cette période.")
+                  : t("Données indisponibles.")}
               </p>
             )}
             {!!summary?.unlocatedViews && (
               <p className="register-country-note">
-                {count(summary.unlocatedViews, "vue")} sans pays renseigné
+                {count(summary.unlocatedViews, "vue")} {t("sans pays renseigné")}
               </p>
             )}
           </section>
@@ -269,14 +267,14 @@ export default function AnalyticsDashboard({
       <div
         className="register-tools"
         role="group"
-        aria-label="Commandes du registre"
+        aria-label={t("Commandes du registre")}
       >
-        <span>7 jours</span>
+        <span>{t("7 jours")}</span>
         <button
           aria-pressed={uv}
           onClick={() => setUv((v) => !v)}
           disabled={!summary}
-          title="Révéler l’origine des clics"
+          title={t("Révéler l’origine des clics")}
         >
           <Scan size={16} />
           <span>UV</span>
@@ -284,8 +282,8 @@ export default function AnalyticsDashboard({
         <button
           onClick={() => startRefresh(() => router.refresh())}
           disabled={refreshing}
-          aria-label="Actualiser les statistiques"
-          title="Actualiser"
+          aria-label={t("Actualiser les statistiques")}
+          title={t("Actualiser")}
         >
           <RefreshCw
             size={16}
@@ -293,16 +291,12 @@ export default function AnalyticsDashboard({
           />
         </button>
       </div>
-      <p className="register-method">
-        Une vue correspond à un chargement de l’accueil, pas à un visiteur
-        unique. Les clics comptent les liens activés. Les robots et les visites
-        répétées peuvent être inclus. Conservation des données : sept jours.
-      </p>
+      <p className="register-method">{t("Une vue correspond à un chargement de l’accueil, pas à un visiteur unique. Les clics comptent les liens activés. Les robots et les visites répétées peuvent être inclus. Conservation des données : sept jours.")}</p>
       <span className="sr-only" role="status">
         {refreshing
-          ? "Actualisation des statistiques…"
+          ? t("Actualisation des statistiques…")
           : uv
-            ? "UV activé. Origine des clics révélée sur chaque visa."
+            ? t("UV activé. Origine des clics révélée sur chaque visa.")
             : ""}
       </span>
     </main>

@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
+import { LanguageProvider } from "@/i18n/LanguageProvider";
 import localFont from "next/font/local";
 import "./globals.css";
 import { site } from "@/lib/site";
@@ -48,10 +50,11 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const locale = headers().get("x-passport-locale") === "en" ? "en" : "fr";
   return (
-    <html lang="fr">
+    <html lang={locale}>
       <body className={`${sans.variable} ${display.variable} ${ocr.variable}`}>
-        {children}
+        <LanguageProvider locale={locale}>{children}</LanguageProvider>
       </body>
     </html>
   );

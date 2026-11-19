@@ -1,4 +1,6 @@
 "use client";
+import { LanguageSwitch } from "@/i18n/LanguageSwitch";
+import { useLanguage } from "@/i18n/LanguageProvider";
 import dynamic from "next/dynamic";
 import { spreadCount, travelPages } from "./travel-content";
 import type { CityMarker } from "./travel-layout";
@@ -68,6 +70,7 @@ function DestinationIcon({ id }: { id: DestinationId }) {
   );
 }
 export default function PassportExperience() {
+  const { locale, t } = useLanguage();
   const [open, setOpen] = useState(false),
     [page, setPage] = useState(0),
     [uv, setUv] = useState(false);
@@ -120,12 +123,12 @@ export default function PassportExperience() {
     paused: turning || (open && page >= spreadCount) || showLinks || !!selected || readingIndex !== null || !!city || uv,
   });
   const discoveryText = discovery.cue === "cover"
-    ? coarsePointer ? "Touchez la couverture pour ouvrir le passeport." : "Cliquez sur la couverture pour ouvrir le passeport."
+    ? coarsePointer ? t("Touchez la couverture pour ouvrir le passeport.") : t("Cliquez sur la couverture pour ouvrir le passeport.")
     : discovery.cue === "turn"
-      ? "Faites glisser les pages pour les tourner."
+      ? t("Faites glisser les pages pour les tourner.")
       : discovery.cue === "city"
-        ? coarsePointer ? "Touchez une ville pour la découvrir." : "Survolez une ville pour la découvrir."
-        : "Activez UV pour révéler les souvenirs cachés.";
+        ? coarsePointer ? t("Touchez une ville pour la découvrir.") : t("Survolez une ville pour la découvrir.")
+        : t("Activez UV pour révéler les souvenirs cachés.");
   const menuButton = useRef<HTMLButtonElement>(null),
     menu = useRef<HTMLElement>(null),
     peekLink = useRef<HTMLAnchorElement>(null);
@@ -231,11 +234,9 @@ export default function PassportExperience() {
         className="skip-link"
         href="#direct-links"
         onClick={() => setShowLinks(true)}
-      >
-        Accéder aux liens
-      </a>
+      >{t("Accéder aux liens")}</a>
       <header className="site-header">
-        <a href="/" className="wordmark" aria-label="Raxuis, accueil">
+        <a href="/" className="wordmark" aria-label={t("Raxuis, accueil")}>
           <Image
             src="/identity/raxuis-logo.png"
             alt=""
@@ -244,6 +245,8 @@ export default function PassportExperience() {
           />
           <span>Raxuis</span>
         </a>
+        <div className="header-actions">
+        <LanguageSwitch />
         <button
           ref={menuButton}
           className="links-button"
@@ -254,14 +257,13 @@ export default function PassportExperience() {
             setSelected(null);
           }}
         >
-          <Link2 size={16} />
-          Liens
-        </button>
+          <Link2 size={16} />{t("Liens")}</button>
+        </div>
       </header>
       <h1 className="sr-only">Raphaël Raclot</h1>
       <section
         className="passport-stage"
-        aria-label="Passeport interactif de Raphaël Raclot"
+        aria-label={t("Passeport interactif de Raphaël Raclot")}
       >
         <div
           className={`scene-canvas ${ready && !failed && !simpleMode ? "is-ready" : ""}`}
@@ -270,6 +272,7 @@ export default function PassportExperience() {
           {mounted && !failed && !simpleMode && (
             <SceneBoundary onError={onError}>
               <PassportScene
+                locale={locale}
                 open={open}
                 page={page}
                 uv={uv}
@@ -293,10 +296,10 @@ export default function PassportExperience() {
         </div>
         {!ready && !failed && !simpleMode && (
           <div className="scene-loading" role="status">
-            <p>{progress >= 100 ? "Finalisation…" : "Chargement…"}</p>
+            <p>{progress >= 100 ? t("Finalisation…") : t("Chargement…")}</p>
             <div className="loading-meter">
               <progress
-                aria-label="Chargement du passeport"
+                aria-label={t("Chargement du passeport")}
                 value={progress}
                 max={100}
               />
@@ -316,7 +319,7 @@ export default function PassportExperience() {
       {discovery.cue && (
         <div className="discovery-note" role="status" key={discovery.cue}>
           <span>{discoveryText}</span>
-          <button onClick={discovery.dismiss} aria-label="Masquer cette indication">
+          <button onClick={discovery.dismiss} aria-label={t("Masquer cette indication")}>
             <X size={14} aria-hidden="true" />
           </button>
         </div>
@@ -325,15 +328,15 @@ export default function PassportExperience() {
         <div
           className="document-controls"
           role="group"
-          aria-label="Commandes du passeport"
+          aria-label={t("Commandes du passeport")}
         >
           <button
             className={`uv-button ${uv ? "active" : ""}`}
             aria-pressed={uv}
-            aria-label="Lumière UV"
+            aria-label={t("Lumière UV")}
             disabled={turning}
             onClick={() => setUv((v) => !v)}
-            title="Lumière UV"
+            title={t("Lumière UV")}
           >
             <Scan size={17} />
             <span>UV</span>
@@ -345,10 +348,10 @@ export default function PassportExperience() {
               disabled={turning}
               onClick={() => setUvFull((v) => !v)}
               title={
-                uvFull ? "Revenir à la lampe mobile" : "Révéler toute la page"
+                uvFull ? t("Revenir à la lampe mobile") : t("Révéler toute la page")
               }
             >
-              {uvFull ? "Lampe" : "Tout éclairer"}
+              {uvFull ? t("Lampe") : t("Tout éclairer")}
             </button>
           )}
           {open && page < spreadCount && (
@@ -361,17 +364,17 @@ export default function PassportExperience() {
                 setSelected(null);
                 setReadingIndex(page * 2);
               }}
-              aria-label="Lire une page en plein écran"
-              title="Lire une page"
+              aria-label={t("Lire une page en plein écran")}
+              title={t("Lire une page")}
             >
               <Maximize2 size={17} />
-              <span>Lire</span>
+              <span>{t("Lire")}</span>
             </button>
           )}
           {open ? (
             <>
               <button
-                aria-label="Page précédente"
+                aria-label={t("Page précédente")}
                 onClick={() => {
                   if (page === 0) close();
                   else onTurn(page - 1);
@@ -379,18 +382,18 @@ export default function PassportExperience() {
                 }}
                 disabled={turning}
                 title={
-                  page === 0 ? "Première de couverture" : "Page précédente"
+                  page === 0 ? t("Première de couverture") : t("Page précédente")
                 }
               >
                 <ArrowLeft size={17} />
               </button>
               <span className="page-counter">
                 {page === spreadCount
-                  ? "Couverture"
-                  : `${page + 1} sur ${spreadCount}`}
+                  ? t("Couverture")
+                  : t(`${page + 1} sur ${spreadCount}`)}
               </span>
               <button
-                aria-label="Page suivante"
+                aria-label={t("Page suivante")}
                 onClick={() => {
                   onTurn(Math.min(spreadCount, page + 1));
                   setSelected(null);
@@ -400,10 +403,10 @@ export default function PassportExperience() {
                 <ArrowRight size={17} />
               </button>
               <button
-                aria-label="Fermer le passeport"
+                aria-label={t("Fermer le passeport")}
                 onClick={close}
                 disabled={turning}
-                title="Fermer"
+                title={t("Fermer")}
               >
                 <X size={17} />
               </button>
@@ -413,8 +416,7 @@ export default function PassportExperience() {
               className="control-open"
               onClick={onOpen}
               disabled={turning}
-            >
-              Ouvrir <ArrowRight size={16} />
+            >{t("Ouvrir")}<ArrowRight size={16} />
             </button>
           )}
         </div>
@@ -424,7 +426,7 @@ export default function PassportExperience() {
         className="links-panel"
         ref={menu}
         hidden={!showLinks}
-        aria-label="Liens de Raphaël Raclot"
+        aria-label={t("Liens de Raphaël Raclot")}
       >
         {destinations.map((d) => (
           <a
@@ -453,20 +455,20 @@ export default function PassportExperience() {
         ))}
         <div className="links-utilities">
           <button onClick={simple}>
-            {simpleMode || failed ? "Vue interactive" : "Vue simple"}
+            {simpleMode || failed ? t("Vue interactive") : t("Vue simple")}
           </button>
-          <a href="/analytics">Statistiques</a>
+          <a href={locale === "en" ? "/en/analytics" : "/analytics"}>{t("Statistiques")}</a>
         </div>
       </nav>
       {chosen && open && !failed && !simpleMode && (
-        <aside className="destination-peek" aria-label="Lien sélectionné">
+        <aside className="destination-peek" aria-label={t("Lien sélectionné")}>
           <button
             className="peek-close"
             onClick={() => {
               setSelected(null);
               menuButton.current?.focus();
             }}
-            aria-label="Fermer l’aperçu"
+            aria-label={t("Fermer l’aperçu")}
           >
             <X size={15} />
           </button>
@@ -479,8 +481,7 @@ export default function PassportExperience() {
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => trackDestination(chosen.id, "scene")}
-          >
-            Ouvrir <ArrowUpRight size={16} />
+          >{t("Ouvrir")}<ArrowUpRight size={16} />
           </a>
         </aside>
       )}
@@ -493,7 +494,7 @@ export default function PassportExperience() {
         />
       )}
       <noscript>
-        <nav className="no-script-links" aria-label="Liens directs">
+        <nav className="no-script-links" aria-label={t("Liens directs")}>
           {destinations.map((d) => (
             <a
               key={d.id}
@@ -521,25 +522,25 @@ export default function PassportExperience() {
             ),
           }}
         >
-          <strong>{city.city.name}</strong>
-          <small>{city.country}</small>
+          <strong>{t(city.city.name)}</strong>
+          <small>{t(city.country)}</small>
           {(uv && city.city.uvNote ? city.city.uvNote : city.city.note) && (
-            <p>{uv && city.city.uvNote ? city.city.uvNote : city.city.note}</p>
+            <p>{t(uv && city.city.uvNote ? city.city.uvNote : city.city.note)}</p>
           )}
         </aside>
       )}
       <div className="sr-only" aria-live="polite">
         {simpleMode || failed
-          ? "Vue simple du passeport."
+          ? t("Vue simple du passeport.")
           : ready
-            ? "Le passeport est prêt."
+            ? t("Le passeport est prêt.")
             : ""}{" "}
         {open
           ? page === spreadCount
-            ? "Quatrième de couverture."
-            : `Passeport ouvert, double page ${page + 1} sur ${spreadCount}.`
+            ? t("Quatrième de couverture.")
+            : t(`Passeport ouvert, double page ${page + 1} sur ${spreadCount}.`)
           : ""}{" "}
-        {uv ? "Lumière UV activée." : ""}
+        {uv ? t("Lumière UV activée.") : ""}
       </div>
     </main>
   );

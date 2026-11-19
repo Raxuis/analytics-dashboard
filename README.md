@@ -1,17 +1,23 @@
-# Passeport Raxuis
+# Raxuis Passport
 
-Une porte d’entrée personnelle vers le portfolio de Raphaël Raclot, GitHub, LinkedIn et X. Le passeport est dessiné et animé avec Three.js, React Three Fiber et GSAP. Les pages et matières sont produites localement, sans modèle 3D ni service externe. Les liens HTML restent disponibles pendant le chargement et sans WebGL.
+English · [Français](README.fr.md)
 
-## Développement
+A personal gateway to Raphaël Raclot’s portfolio, GitHub, LinkedIn and X. The passport is drawn and animated with Three.js, React Three Fiber and GSAP. Pages and materials are generated locally, without an external 3D model or rendering service. HTML links remain available while loading and without WebGL.
 
-Node.js 20.9 ou plus récent.
+[Open the English passport](https://passport.raphaelraclot.dev) · [Ouvrir le passeport français](https://passeport.raphaelraclot.dev)
+
+## Development
+
+Requires Node.js 20.9 or later.
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Ouvrir http://localhost:3000. Le bouton « Liens » ouvre les destinations directes et donne accès à « Vue simple » pour utiliser la présentation sans 3D. La vue simple présente les pages HTML avec les quatre liens et les voyages, et un retour à la scène interactive. L’interface respecte la préférence de réduction des animations. Le rendu fonctionne à la demande, sans boucle d’animation permanente lorsque l’objet est immobile.
+Open http://localhost:3000 for French or http://localhost:3000/en for English. **Links** opens the destinations directly and provides **Simple view** for a presentation without 3D. The simple view includes all four links and the travel pages, with a return to the interactive scene.
+
+The interface respects reduced motion. Rendering runs on demand; there is no continuous animation loop while the object is idle.
 
 ```sh
 npm test
@@ -20,50 +26,60 @@ npm run build
 npm start
 ```
 
-## Identité
+## Languages
 
-Le R d’origine est conservé dans `public/identity/raxuis-logo.png`. Le favicon SVG adapte exactement sa silhouette en dorure sur une couverture bordeaux. `npm run icons` régénère l’emblème de couverture, puis génère le favicon ICO aux tailles 16, 32 et 48 pixels, l’icône Apple et un aperçu PNG.
+`passport.raphaelraclot.dev` serves English and `passeport.raphaelraclot.dev` serves French. Both are connected to the same Vercel project through Porkbun CNAME records. The portfolio’s main domain keeps its existing configuration.
 
-Les polices DM Sans et Space Grotesk sont distribuées localement avec leurs licences dans `public/fonts`. Le texte, les destinations et la mesure des clics sont définis dans `src/components/passport/destinations.ts`. Les matières imprimées sont dans `passport-textures.ts`; la géométrie, les shaders et les animations sont dans `PassportScene.tsx`.
+The discreet **EN** or **FR** header link switches languages. Localized pages, canvas lettering, city tooltips, UV memories, reading mode, discovery hints, the register and sharing metadata use the same language. Country names come from ISO data and `Intl.DisplayNames`. Both hosts share the same anonymous counters; internal rewrites do not count a visit twice.
 
-## Statistiques
+- `src/i18n/en.json`: English translations of the original French copy.
+- `src/i18n/routing.ts`: language and domain routing.
+- `src/i18n/metadata.ts`: localized titles, descriptions, canonical URLs and reciprocal language links.
+- `src/components/passport/travel-content.ts`: the original personal travel data, unchanged by translation.
 
-Copier `.env.example` vers `.env.local` et renseigner les variables Upstash côté serveur, ou configurer leurs équivalents dans Vercel. Ne jamais les préfixer avec `NEXT_PUBLIC_` ni les envoyer au navigateur.
+## Identity and artwork
 
-La configuration recommandée utilise `UPSTASH_REDIS_REST_URL` et `UPSTASH_REDIS_REST_TOKEN`. Les noms `REDIS_URL` et `REDIS_KEY` sont également acceptés. Le déploiement historique utilisant uniquement `REDIS_KEY` conserve son endpoint d’origine comme repli; migrer vers une URL explicite est recommandé.
+The original R logo is preserved in `public/identity/raxuis-logo.png`. The favicon adapts its exact silhouette in gold on burgundy. The cover uses a vector adaptation of the French passport emblem, with its source and CC BY-SA 4.0 attribution in [the artwork credits](public/identity/sources/ATTRIBUTION.md).
 
-Le middleware enregistre les vues de l’accueil en arrière-plan. Les liens envoient un événement distinct vers `/api/events` sans retarder la navigation. Les requêtes Redis sont interrompues après 1,8 seconde, sans nouvelle tentative automatique. Le tableau de bord `/analytics` présente un état indisponible lorsque le service ne répond pas, et n’invente aucun chiffre. Les données sont conservées sept jours et agrégées en UTC. Les statistiques comptent les chargements et clics, pas des visiteurs uniques. Les robots et activations répétées peuvent être inclus.
+```sh
+npm run icons
+npm run social:generate
+npm run flags:generate
+npm run countries:generate
+```
 
-Ce tableau de bord reste public, comme dans le dépôt d’origine, et n’est pas indexable. Il n’expose que des agrégats. Les compteurs anonymes ne sont pas une source de confiance pour facturation ou décisions critiques. La validation en local ne prouve pas la disponibilité de la base en production; vérifier les variables et les logs Vercel avant publication.
+The icon command produces ICO sizes 16, 32 and 48, the Apple icon and a PNG preview. Social previews are generated at 1200 × 630 in `public/social/passport.png` and `public/social/passport-en.png`. Flags are local 4:3 SVGs from the pinned MIT-licensed `flag-icons` package. There are no flag emojis or external runtime requests.
 
-## Choix et validation
+DM Sans, Space Grotesk and OCR B are self-hosted with their licenses in `public/fonts`. Destinations and click recording are defined in `destinations.ts`; printed materials in `passport-textures.ts`; geometry, shaders and interaction in `PassportScene.tsx`.
 
-La conception validée et le plan figurent dans `docs/superpowers`. La branche `main` est déployée automatiquement par l’intégration GitHub de Vercel. Les tests couvrent le délai réel d’annulation des appels Redis, la compatibilité de configuration, les erreurs de stockage, l’agrégation et la validation de l’endpoint.
+## Travel contributions
 
-Le diagnostic du 504 en production est consigné dans `docs/superpowers/specs/2026-11-12-analytics-diagnosis.md`. L’ancien endpoint ne résout plus dans le DNS. Une nouvelle base Upstash gratuite est maintenant reliée au projet Vercel en production ; ses variables REST `KV_REST_API_URL` et `KV_REST_API_TOKEN` sont prioritaires sur les anciennes variables.
+Edit countries, cities and UV memories in `src/components/passport/travel-content.ts`. Pages are created automatically. There are 177 prepared country silhouettes and a local flag catalog; country codes select the matching assets automatically.
 
-La page d’accueil suit désormais la direction confirmée : le passeport centré, presque seul, des commandes discrètes et un panneau de liens. `PRODUCT.md`, `DESIGN.md` et `.impeccable/surfaces/app-page-tsx.md` consignent cette décision. Aucun habillage éditorial, slogan ou texte d’ambiance ne doit être réintroduit.
+See the [contribution guide](docs/passport-contributing.md) and [country codes](docs/passport-countries.md). Add English translations for new notes to `src/i18n/en.json`. Existing personal details are not replaced with invented content.
 
-## Contribuer au passeport
+## Interaction and reading
 
-Les voyages et les villes se modifient dans `src/components/passport/travel-content.ts`. Les pages se créent automatiquement. 177 silhouettes de pays sont déjà préparées. Voir [le guide de contribution](docs/passport-contributing.md) et [les codes pays](docs/passport-countries.md).
+Covers and sheets follow dragging and can return to their original position before release. Cancellation or loss of focus does not complete a gesture. On small screens, **Read** opens one selectable HTML page at a time, with navigation, UV memories and accessible links. Closing it or pressing Escape returns to the corresponding spread and restores focus after its transition.
 
-## Registre des passages
+First visits receive contextual hints for opening the cover, dragging pages, exploring a city and using UV. Each hint is remembered separately under `raxuis.passport.discovery.v1` in local storage. Visitors who discover an action themselves skip its explanation. Motion is brief, interruptible and does not loop; reduced motion retains the text. The rules live in `discovery-state.ts`, timing in `usePassportDiscovery.ts` and 3D effects in `DiscoveryMotion.tsx`.
 
-La page `/analytics` présente les sept derniers jours dans un registre HTML accessible. Les visas montrent les clics par destination ; un clic sur un visa ou le bouton UV révèle leur origine entre passeport et menu Liens. Actualiser recharge les données sans quitter le registre. Les jours suivent UTC, les compteurs restent réels et les pannes ne sont pas remplacées par des zéros. Les silhouettes des pays réutilisent les assets du passeport ; un pays sans silhouette conserve son nom et son code. Sur téléphone, les deux feuilles sont empilées.
+## Analytics
 
-## Adresse et partage
+Copy `.env.example` to `.env.local` and set the server-side Upstash REST variables, or configure their equivalents in Vercel. Never prefix them with `NEXT_PUBLIC_` or expose them to the browser.
 
-Adresse publique dédiée : https://passeport.raphaelraclot.dev. Le domaine reste géré chez Porkbun ; seul le CNAME `passeport` pointe vers le projet Vercel du passeport. Le domaine principal du portfolio conserve sa configuration.
+Recommended names are `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`. Vercel Marketplace’s `KV_REST_API_URL` and `KV_REST_API_TOKEN` are also supported and take priority over native or legacy Redis variables. The historical `REDIS_KEY` fallback remains for compatibility. Production uses a new free Upstash database connected to the Vercel project.
 
-L’identité publique et les métadonnées sont dans `src/lib/site.ts`. `npm run social:generate` recrée l’image Open Graph et Twitter de 1200 × 630 dans `public/social/passport.png`, à partir de l’emblème vectoriel de couverture et de la police locale. `npm run icons` produit le favicon à plusieurs tailles ; la version 16 pixels utilise un R simplifié, les grandes tailles conservent les détails du passeport.
+Middleware records homepage views in the background. Links send separate events to `/api/events` without delaying navigation. Redis requests abort after 1.8 seconds without automatic retries. Data is retained for seven days and aggregated in UTC. These are page loads and link activations, not unique visitors; bots and repeated visits may be included.
 
-## Lecture et finition
+The public, non-indexable `/analytics` register displays real aggregate data. The English path is `/en/analytics` locally. UV or selecting a visa reveals click sources between the passport and direct links. Refresh reloads the data in place. An unavailable store produces an unavailable state, never fabricated zeroes. Country silhouettes reuse the passport assets; a country without a silhouette retains its name and code. On phones, the two sheets stack vertically.
 
-Sur petit écran, le bouton **Lire** ouvre une seule page HTML en grand, avec navigation entre les pages, souvenirs UV et liens accessibles. Le retour ou la touche Échap ramène à la double page correspondante, puis restaure le focus après sa transition. Les couvertures et les feuilles suivent le glissement et peuvent revenir à leur position initiale avant relâchement. Une annulation ou une perte de focus ne valide pas le geste.
+Anonymous counters are not a trusted basis for billing or critical decisions. Local checks do not prove production database availability; verify production configuration and logs before publishing.
 
-Le suivi de la passe de finition est dans [docs/passport-polish.md](docs/passport-polish.md). Le contenu personnel reste à compléter manuellement dans les données existantes.
+## Design and delivery
 
-## Première visite
+The approved direction keeps the passport centered, almost alone, with discreet controls and a compact links panel. `PRODUCT.md`, `DESIGN.md` and `.impeccable/surfaces/app-page-tsx.md` record that direction. Editorial wrappers, slogans and decorative captions should not be reintroduced.
 
-Le passeport propose des indices contextuels pour ouvrir la couverture, glisser les pages, explorer une ville et utiliser l’UV. Chaque indice est mémorisé sous `raxuis.passport.discovery.v1` dans le stockage local ; les visiteurs qui trouvent un geste seuls ne reçoivent pas son explication. Les mouvements restent courts, annulables et sans boucle ; la préférence de réduction des animations conserve le texte. Les règles sont dans `discovery-state.ts`, le timing dans `usePassportDiscovery.ts` et les effets 3D dans `DiscoveryMotion.tsx`.
+Specifications and plans live in `docs/superpowers`; [the finishing checklist](docs/passport-polish.md) tracks the presentation pass. The original 504 investigation is in `docs/superpowers/specs/2026-11-12-analytics-diagnosis.md`. GitHub’s Vercel integration deploys `main` automatically.
+
+Tests cover Redis cancellation and configuration, storage failures, aggregation, event validation, page geometry, gestures, native reading and first-visit discovery.

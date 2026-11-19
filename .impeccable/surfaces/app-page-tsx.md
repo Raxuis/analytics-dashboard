@@ -32,3 +32,7 @@ Une seule démonstration brève par geste : couverture légèrement soulevée, c
 ## Couverture du 17 novembre 2026
 
 À la demande de Raphaël, le grand R personnel sur la couverture est remplacé par une adaptation vectorielle de l’emblème du passeport français. La composition conserve son nom et le cuir bordeaux. Le mot PASSEPORT est souligné. Le header et le favicon gardent le logo personnel. Source et licence CC BY-SA 4.0 : public/identity/sources/ATTRIBUTION.md. L’aperçu de partage suit la nouvelle couverture.
+
+## Langues
+
+La version anglaise habite passport.raphaelraclot.dev ; passeport.raphaelraclot.dev conserve le français. Un lien de langue de 44 pixels accompagne le bouton Liens dans le header. Les matières, géométries et gestes restent identiques. Le lecteur, les textures imprimées, villes et souvenirs traduits suivent la langue, sans modification des faits personnels.

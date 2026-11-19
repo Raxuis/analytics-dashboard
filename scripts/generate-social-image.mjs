@@ -4,6 +4,7 @@ import path from "node:path";
 import sharp from "sharp";
 const fontfile = path.resolve("public/fonts/dm-sans.ttf");
 const gold = "#d8b36b";
+const english = process.argv.includes("--locale=en");
 async function label(text, size, color, left, top, center = false) {
   const { data, info } = await sharp({
     text: {
@@ -46,7 +47,7 @@ const flatCover = await sharp(coverBase)
     await label("Raphaël Raclot", 19, gold, 158, 43, true),
     await label("Raxuis", 16, gold, 158, 72, true),
     { input: crest, left: 65, top: 128 },
-    await label("PASSEPORT", 20, gold, 158, 365, true),
+    await label(english ? "PASSPORT" : "PASSEPORT", 20, gold, 158, 365, true),
     { input: underline, left: 93, top: 391 },
     { input: chip, left: 140, top: 402 },
   ])
@@ -64,9 +65,9 @@ await sharp({
     { input: cover, left: 164, top: 66 },
     await label("Raphaël", 54, "#f3f3f4", 620, 175),
     await label("Raclot", 54, "#f3f3f4", 620, 243),
-    await label("Portfolio · Liens · Voyages", 22, "#b5b5bd", 620, 349),
-    await label("passeport.raphaelraclot.dev", 18, "#d8b36b", 620, 453),
+    await label(english ? "Portfolio · Links · Travels" : "Portfolio · Liens · Voyages", 22, "#b5b5bd", 620, 349),
+    await label(english ? "passport.raphaelraclot.dev" : "passeport.raphaelraclot.dev", 18, "#d8b36b", 620, 453),
   ])
   .png()
-  .toFile("public/social/passport.png");
+  .toFile(`public/social/passport${english ? "-en" : ""}.png`);
 console.log("Created self-hosted social preview, 1200 × 630.");

@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element -- Native local images keep the non-WebGL document independent of the canvas loader. */
+import { useLanguage } from "@/i18n/LanguageProvider";
 import React, { useState } from "react";
 import { CountryFlag } from "./CountryFlag";
 import { identityMachineLines } from "./identity-data";
@@ -34,6 +35,7 @@ function TravelPage({
   uv: boolean;
   index: number;
 }) {
+  const { t } = useLanguage();
   const [selected, setSelected] = useState<TravelCity | null>(null);
   return (
     <section
@@ -41,16 +43,16 @@ function TravelPage({
       aria-labelledby={`travel-title-${index}`}
     >
       <div className="simple-page-header">
-        <h2 id={`travel-title-${index}`}>Voyages</h2>
-        <span>{countryName(memory.country)}</span>
+        <h2 id={`travel-title-${index}`}>{t("Voyages")}</h2>
+        <span>{t(countryName(memory.country))}</span>
       </div>
       <div className="simple-travel-map">
         <img src={`/identity/countries/${memory.country}.svg`} alt="" />
         {cityMarkers(memory).map((marker) => (
           <button
             className="city-point"
-            key={marker.city.name}
-            aria-label={`${marker.city.name}, ${marker.country}`}
+            key={t(marker.city.name)}
+            aria-label={`${t(marker.city.name)}, ${t(marker.country)}`}
             aria-describedby={`city-${index}-${marker.city.name.replace(/\s+/g, "-")}`}
             data-align={marker.x > 600 ? "right" : "left"}
             style={{
@@ -72,15 +74,15 @@ function TravelPage({
               role="tooltip"
               id={`city-${index}-${marker.city.name.replace(/\s+/g, "-")}`}
             >
-              <strong>{marker.city.name}</strong>
-              <small>{marker.country}</small>
+              <strong>{t(marker.city.name)}</strong>
+              <small>{t(marker.country)}</small>
               {(uv && marker.city.uvNote
                 ? marker.city.uvNote
                 : marker.city.note) && (
                 <span>
-                  {uv && marker.city.uvNote
+                  {t(uv && marker.city.uvNote
                     ? marker.city.uvNote
-                    : marker.city.note}
+                    : marker.city.note)}
                 </span>
               )}
             </span>
@@ -88,10 +90,10 @@ function TravelPage({
         ))}
       </div>
       {!!memory.cities?.length && (
-        <div className="city-index" role="group" aria-label="Villes visitées">
+        <div className="city-index" role="group" aria-label={t("Villes visitées")}>
           {memory.cities.map((city) => (
             <button
-              key={city.name}
+              key={t(city.name)}
               type="button"
               aria-expanded={selected?.name === city.name}
               aria-controls={`city-detail-${index}`}
@@ -102,7 +104,7 @@ function TravelPage({
                 if (e.key === "Escape") setSelected(null);
               }}
             >
-              {city.name}
+              {t(city.name)}
             </button>
           ))}
         </div>
@@ -115,10 +117,10 @@ function TravelPage({
       >
         {selected && (
           <>
-            <strong>{selected.name}</strong>
+            <strong>{t(selected.name)}</strong>
             <p>
-              {(uv && selected.uvNote ? selected.uvNote : selected.note) ??
-                countryName(memory.country)}
+              {t((uv && selected.uvNote ? selected.uvNote : selected.note) ??
+                countryName(memory.country))}
             </p>
           </>
         )}
@@ -127,21 +129,21 @@ function TravelPage({
         <div className="simple-uv-memory">
           <strong>
             {memory.visits
-              ? `${memory.visits} ${memory.visits === 1 ? "séjour" : "séjours"}`
-              : "Visité"}
+              ? t(`${memory.visits} ${memory.visits === 1 ? "séjour" : "séjours"}`)
+              : t("Visité")}
           </strong>
-          {memory.uvNote && <p>{memory.uvNote}</p>}
+          {memory.uvNote && <p>{t(memory.uvNote)}</p>}
         </div>
       )}
       <div className="simple-travel-sticker">
-        <h3 className="country-name"><CountryFlag code={memory.country} />{countryName(memory.country)}</h3>
+        <h3 className="country-name"><CountryFlag code={memory.country} />{t(countryName(memory.country))}</h3>
         <p>
           {memory.visits
-            ? `${memory.visits} ${memory.visits === 1 ? "visite" : "visites"}`
-            : "Visité"}
+            ? t(`${memory.visits} ${memory.visits === 1 ? "visite" : "visites"}`)
+            : t("Visité")}
         </p>
         {memory.places && (
-          <p className="memory-places">{memory.places.join(", ")}</p>
+          <p className="memory-places">{memory.places.map((place) => t(place)).join(", ")}</p>
         )}
       </div>
       <span className="simple-page-folio" aria-hidden="true">
@@ -159,21 +161,18 @@ export function SimplePassport({
   onInteractive,
   onTrack,
 }: Props) {
+  const { t } = useLanguage();
   return (
     <div className="simple-view-document">
       {onUv && (
-        <button className="simple-uv-toggle" aria-pressed={uv} onClick={onUv}>
-          Lumière UV
-        </button>
+        <button className="simple-uv-toggle" aria-pressed={uv} onClick={onUv}>{t("Lumière UV")}</button>
       )}
       {error && (
-        <p className="simple-error" role="status">
-          La vue 3D est indisponible. Les liens restent accessibles ci-dessous.
-        </p>
+        <p className="simple-error" role="status">{t("La vue 3D est indisponible. Les liens restent accessibles ci-dessous.")}</p>
       )}
       <div
         className="simple-passport"
-        aria-label="Passeport personnel de Raphaël Raclot"
+        aria-label={t("Passeport personnel de Raphaël Raclot")}
       >
         {(pageIndex === undefined || pageIndex === 0) && (
           <section
@@ -181,8 +180,8 @@ export function SimplePassport({
             aria-labelledby="simple-identity-title"
           >
             <div className="simple-page-header">
-              <h2 id="simple-identity-title">Passeport personnel</h2>
-              <span>Identité</span>
+              <h2 id="simple-identity-title">{t("Passeport personnel")}</h2>
+              <span>{t("Identité")}</span>
             </div>
             <div className="simple-biodata">
               <img
@@ -193,21 +192,21 @@ export function SimplePassport({
               />
               <dl>
                 <div>
-                  <dt>Nom</dt>
+                  <dt>{t("Nom")}</dt>
                   <dd>RACLOT</dd>
                 </div>
                 <div>
-                  <dt>Prénom</dt>
+                  <dt>{t("Prénom")}</dt>
                   <dd>RAPHAËL</dd>
                 </div>
                 <div>
-                  <dt>Pseudonyme</dt>
+                  <dt>{t("Pseudonyme")}</dt>
                   <dd>RAXUIS</dd>
                 </div>
               </dl>
             </div>
             <dl className="simple-site">
-              <dt>Site</dt>
+              <dt>{t("Site")}</dt>
               <dd>raphaelraclot.dev</dd>
             </dl>
             <div className="simple-mrz" aria-hidden="true">
@@ -230,12 +229,12 @@ export function SimplePassport({
             aria-labelledby="simple-visas-title"
           >
             <div className="simple-page-header">
-              <h2 id="simple-visas-title">Visas</h2>
+              <h2 id="simple-visas-title">{t("Visas")}</h2>
               <span>Raxuis</span>
             </div>
             <nav
               className="simple-destinations"
-              aria-label="Destinations du passeport"
+              aria-label={t("Destinations du passeport")}
             >
               {destinations.map((d) => (
                 <a
@@ -285,9 +284,7 @@ export function SimplePassport({
         )}
       </div>
       {onInteractive && (
-        <button className="simple-return" onClick={onInteractive}>
-          Revenir à la vue interactive
-        </button>
+        <button className="simple-return" onClick={onInteractive}>{t("Revenir à la vue interactive")}</button>
       )}
     </div>
   );

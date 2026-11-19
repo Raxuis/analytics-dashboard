@@ -1113,3 +1113,19 @@ p {
 @media (prefers-reduced-motion: reduce) {
   .discovery-note { animation: none; }
 }
+
+.header-actions { display: flex; align-items: center; gap: 8px; }
+.language-switch {
+  display: inline-grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 8px;
+  color: #b5b5bd;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+}
+.language-switch:hover { color: #f3f3f4; background: #242428; }
+.language-switch:focus-visible { outline: 2px solid #f3f3f4; outline-offset: 2px; }
+.language-switch:active { background: #323237; }

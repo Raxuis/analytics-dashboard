@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/i18n/LanguageProvider";
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, Minimize2, Scan } from "lucide-react";
 import { SimplePassport } from "./SimplePassport";
@@ -16,16 +17,17 @@ export function PassportReader({
   onUv: () => void;
   onExit: (page: number) => void;
 }) {
+  const { t } = useLanguage();
   const [page, setPage] = useState(initialPage);
   const dialog = useRef<HTMLDialogElement>(null);
   const body = useRef<HTMLDivElement>(null);
   const count = 2 + travelPages.length;
   const title =
     page === 0
-      ? "Identité"
+      ? t("Identité")
       : page === 1
-        ? "Visas"
-        : travelPages[page - 2]!.title;
+        ? t("Visas")
+        : t(travelPages[page - 2]!.title);
   useEffect(() => {
     const node = dialog.current;
     node?.showModal();
@@ -48,8 +50,8 @@ export function PassportReader({
         <h2 id="reader-title">{title}</h2>
         <button
           onClick={() => onExit(page)}
-          aria-label="Revenir à la double page"
-          title="Revenir au passeport"
+          aria-label={t("Revenir à la double page")}
+          title={t("Revenir au passeport")}
         >
           <Minimize2 size={19} />
         </button>
@@ -62,27 +64,27 @@ export function PassportReader({
           onTrack={(id) => trackDestination(id, "scene")}
         />
       </div>
-      <footer className="reader-controls" aria-label="Commandes de lecture">
+      <footer className="reader-controls" aria-label={t("Commandes de lecture")}>
         <button
           aria-pressed={uv}
           onClick={onUv}
-          title="Révéler les souvenirs UV"
+          title={t("Révéler les souvenirs UV")}
         >
           <Scan size={17} />
           <span>UV</span>
         </button>
         <button
-          aria-label="Page précédente en lecture"
+          aria-label={t("Page précédente en lecture")}
           disabled={page === 0}
           onClick={() => setPage((p) => p - 1)}
         >
           <ArrowLeft size={18} />
         </button>
         <span aria-live="polite">
-          {page + 1} sur {count}
+          {t(`${page + 1} sur ${count}`)}
         </span>
         <button
-          aria-label="Page suivante en lecture"
+          aria-label={t("Page suivante en lecture")}
           disabled={page === count - 1}
           onClick={() => setPage((p) => p + 1)}
         >
