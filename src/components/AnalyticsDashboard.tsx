@@ -4,7 +4,6 @@ import { translate, type Locale } from "@/i18n/language";
 import { useLanguage } from "@/i18n/LanguageProvider";
 import React, { useState, useTransition, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, RefreshCw, Scan } from "lucide-react";
 import type { AnalyticsSummary } from "@/utils/analytics";
@@ -55,7 +54,7 @@ export default function AnalyticsDashboard({
   return (
     <main className={`register-site ${uv ? "register-uv" : ""}`}>
       <header className="register-header">
-        <Link href={locale === "en" ? "/en" : "/"} className="wordmark" aria-label={t("Raxuis, accueil")}>
+        <a href={locale === "en" ? "/en" : "/"} className="wordmark" aria-label={t("Raxuis, accueil")}>
           <Image
             src="/identity/raxuis-logo.png"
             width={28}
@@ -63,10 +62,10 @@ export default function AnalyticsDashboard({
             alt=""
           />
           <span>Raxuis</span>
-        </Link>
+        </a>
         <div className="header-actions"><LanguageSwitch />
-        <Link className="register-back" href={locale === "en" ? "/en" : "/"}>
-          <ArrowLeft size={15} />{t("Retour au passeport")}</Link>
+        <a className="register-back" href={locale === "en" ? "/en" : "/"}>
+          <ArrowLeft size={15} />{t("Retour au passeport")}</a>
         </div>
       </header>
       <div
@@ -82,6 +81,7 @@ export default function AnalyticsDashboard({
             <h1 id="register-title">{t("Passages")}</h1>
             <p>{summary ? period(summary, locale) : t("Sept derniers jours")}</p>
           </div>
+          <p className="register-counting-note">{t("Chargements de page, pas visiteurs uniques.")}</p>
           {summary ? (
             <>
               <table className="register-ledger">
@@ -227,7 +227,7 @@ export default function AnalyticsDashboard({
                           className="register-country-art"
                           aria-hidden="true"
                           style={{
-                            maskImage: `url(/identity/countries/${silhouette}.svg)`,
+                            maskImage: `url(/identity/country-masks/${silhouette}.svg)`,
                           }}
                         />
                       ) : (

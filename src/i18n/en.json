@@ -113,5 +113,6 @@
   "Actualisation des statistiques…": "Refreshing statistics…",
   "UV activé. Origine des clics révélée sur chaque visa.": "UV enabled. Click sources revealed on each visa.",
   "Une vue correspond à un chargement de l’accueil, pas à un visiteur unique. Les clics comptent les liens activés. Les robots et les visites répétées peuvent être inclus. Conservation des données : sept jours.": "A view is a homepage load, not a unique visitor. Clicks count activated links. Bots and repeat visits may be included. Data is kept for seven days.",
-  "Chypre du Nord": "Northern Cyprus"
+  "Chypre du Nord": "Northern Cyprus",
+  "Chargements de page, pas visiteurs uniques.": "Page loads, not unique visitors."
 }

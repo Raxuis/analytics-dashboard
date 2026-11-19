@@ -73,3 +73,5 @@ Le lecteur plein écran utilise les mêmes données que le passeport et la vue s
 ## Drapeaux
 
 Les drapeaux sont des SVG locaux au format 4:3, issus de `flag-icons` sous licence MIT. Le code pays utilisé par les voyages suffit : la correspondance alpha-3 vers alpha-2 est automatique. Les 271 assets sont préparés dans `public/identity/flags` et se régénèrent avec `npm run flags:generate`. Aucun emoji ni service externe au chargement. Les drapeaux accompagnent le nom sans le remplacer, et sont décoratifs pour les lecteurs d’écran.
+
+Le registre utilise les masques pleins dans `public/identity/country-masks` pour dessiner ses pointillés une seule fois. `npm run countries:generate` régénère ces masques avec les silhouettes du passeport. La France dispose d’un cadrage métropolitain avec la Corse, puis d’un encart séparé pour la Guyane ; les villes restent projetées dans la bonne région.

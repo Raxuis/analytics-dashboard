@@ -8,6 +8,7 @@ const data = await response.json();
 const catalog = {};
 const iso2 = {};
 await fs.mkdir("public/identity/countries", { recursive: true });
+await fs.mkdir("public/identity/country-masks", { recursive: true });
 function project(rings, rect = { x: 30, y: 30, width: 940, height: 940 }) {
   // Put the dateline through the largest empty longitude interval, not through the country.
   const lons = [...new Set(rings.flat().map((p) => (p[0] + 360) % 360))].sort(
@@ -82,9 +83,20 @@ for (const feature of data.features) {
     labels =
       '<g fill="#315f9b" font-family="sans-serif" font-size="19"><text x="35" y="735">Alaska</text><text x="380" y="790">Hawaï</text></g>';
   }
+  if (code === "FRA") {
+    const metropolitan = rings.filter((ring) => ring[0][0] > -10);
+    const guiana = rings.filter((ring) => ring[0][0] < -40);
+    groups = [
+      project(metropolitan, { x: 30, y: 30, width: 940, height: 760 }),
+      project(guiana, { x: 40, y: 820, width: 170, height: 150 }),
+    ];
+    labels = '<text x="40" y="807" fill="#315f9b" font-family="sans-serif" font-size="19">GF</text>';
+  }
   const d = groups.map((g) => g.d).join(" ");
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><pattern id="dots" width="7" height="7" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="2.3" fill="#315f9b" fill-opacity=".85"/></pattern></defs><path d="${d}" fill="url(#dots)"/>${labels}</svg>\n`;
   await fs.writeFile(`public/identity/countries/${code}.svg`, svg);
+  // The register supplies its own stipple pattern; its mask must stay solid.
+  await fs.writeFile(`public/identity/country-masks/${code}.svg`, `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><path d="${d}" fill="white"/></svg>\n`);
   catalog[code] = {
     name: feature.properties.NAME_FR || feature.properties.NAME,
     ...groups[0].projection,

@@ -332,3 +332,25 @@ test("full-screen reader exposes only the requested printed page", () => {
   assert.ok(!japan.includes("Corée du Sud"));
   assert.ok(!japan.includes("États-Unis"));
 });
+
+test("France keeps metropolitan cities full-size and French Guiana in its own inset", async () => {
+  const { default: catalog } = await import("../src/components/passport/country-catalog.json");
+  const { projectCity, TRAVEL_MAP } = await import("../src/components/passport/travel-layout");
+  assert.equal(catalog.FRA.regions.length, 2);
+  assert.ok(catalog.FRA.east - catalog.FRA.west < 20, "main projection must not span the Atlantic");
+  const paris = projectCity("FRA", { name: "Paris", latitude: 48.8566, longitude: 2.3522 });
+  const cayenne = projectCity("FRA", { name: "Cayenne", latitude: 4.9224, longitude: -52.3135 });
+  assert.ok(paris.y < TRAVEL_MAP.y + TRAVEL_MAP.height * 0.8);
+  assert.ok(cayenne.y > TRAVEL_MAP.y + TRAVEL_MAP.height * 0.8);
+  assert.ok(paris.x > TRAVEL_MAP.x && paris.x < TRAVEL_MAP.x + TRAVEL_MAP.width);
+});
+
+test("every country has a solid register mask so stipple patterns cannot cancel each other", async () => {
+  const { default: catalog } = await import("../src/components/passport/country-catalog.json");
+  const { readFile } = await import("node:fs/promises");
+  for (const code of Object.keys(catalog)) {
+    const svg = await readFile(`public/identity/country-masks/${code}.svg`, "utf8");
+    assert.ok(svg.includes('fill="white"'), code);
+    assert.ok(!svg.includes("<pattern"), code);
+  }
+});
