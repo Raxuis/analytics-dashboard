@@ -144,7 +144,7 @@ export function measure(name: EventName, data: EventData = {}, once = true) {
       process.env.NEXT_PUBLIC_UMAMI_SCRIPT_URL
     ) {
       if (umamiQueue.length < 100)
-        umamiQueue.push({ name, data: { ...data, locale, source: s.source } });
+        umamiQueue.push({ name: name === "outbound" ? `outbound_${data.placement}` : name, data: { ...data, locale, source: s.source } });
       flushUmami();
     }
   } catch {
