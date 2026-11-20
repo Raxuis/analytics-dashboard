@@ -654,3 +654,21 @@
   font-size: 12px;
   line-height: 1.6;
 }
+
+.register-journeys {
+  margin-top: 22px;
+  color: var(--register-ink);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.register-journeys summary {
+  cursor: pointer;
+  min-height: 44px;
+  align-content: center;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.register-journeys summary:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+.register-journeys p { color: var(--register-muted); margin: 10px 0; }
+.register-journeys dl > div { display: flex; justify-content: space-between; gap: 16px; padding: 5px 0; }
+.register-journeys dd { margin: 0; font-variant-numeric: tabular-nums; }

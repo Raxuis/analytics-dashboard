@@ -70,9 +70,11 @@ Copy `.env.example` to `.env.local` and set the server-side Upstash REST variabl
 
 Recommended names are `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`. Vercel Marketplace’s `KV_REST_API_URL` and `KV_REST_API_TOKEN` are also supported and take priority over native or legacy Redis variables. The historical `REDIS_KEY` fallback remains for compatibility. Production uses a new free Upstash database connected to the Vercel project.
 
-Middleware records homepage views in the background. Links send separate events to `/api/events` without delaying navigation. Redis requests abort after 1.8 seconds without automatic retries. Data is retained for seven days and aggregated in UTC. These are page loads and link activations, not unique visitors; bots and repeated visits may be included.
+Middleware records homepage views in the background. Links send separate events to `/api/events` without delaying navigation. Redis requests abort after 1.8 seconds without automatic retries. Data is retained for seven days and aggregated in UTC. These remain page loads and link activations, not unique people. Known bots, localhost, previews and opted-out owner tests are excluded from new measurements; historical figures can include them.
 
 The public, non-indexable `/analytics` register displays real aggregate data. The English path is `/en/analytics` locally. UV or selecting a visa reveals click sources between the passport and direct links. Refresh reloads the data in place. An unavailable store produces an unavailable state, never fabricated zeroes. Country silhouettes reuse the passport assets; a country without a silhouette retains its name and code. On phones, the two sheets stack vertically.
+
+The register also exposes separate, ordered session funnels under **Passport journeys**. Umami Cloud Hobby supplies the private dashboard for explicit interaction events. See [measurement, exclusions and setup](docs/analytics-measurement.md) for definitions and verification.
 
 Anonymous counters are not a trusted basis for billing or critical decisions. Local checks do not prove production database availability; verify production configuration and logs before publishing.
 

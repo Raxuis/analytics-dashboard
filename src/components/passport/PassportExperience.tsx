@@ -1,4 +1,6 @@
 "use client";
+import { usePassportMeasurement } from "./usePassportMeasurement";
+import { measure } from "@/lib/measurement/client";
 import { LanguageSwitch } from "@/i18n/LanguageSwitch";
 import { useLanguage } from "@/i18n/LanguageProvider";
 import dynamic from "next/dynamic";
@@ -105,7 +107,10 @@ export default function PassportExperience() {
   const onCity = useCallback(
     (value: (CityMarker & { clientX: number; clientY: number }) | null) => {
       setCity(value);
-      if (value) setExploredCity(true);
+      if (value) {
+        setExploredCity(true);
+        measure("city_view", { detail: value.city.name });
+      }
     },
     [],
   );
@@ -116,6 +121,7 @@ export default function PassportExperience() {
   }, []);
   const [selected, setSelected] = useState<DestinationId | null>(null),
     [showLinks, setShowLinks] = useState(false);
+  usePassportMeasurement({ ready, failed, open, page, uv, showLinks, simpleMode, readingIndex });
   const discovery = usePassportDiscovery({
     ready: ready && !failed && !simpleMode,
     open, page, exploredCity, uv,

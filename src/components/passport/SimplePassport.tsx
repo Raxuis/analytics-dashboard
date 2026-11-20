@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element -- Native local images keep the non-WebGL document independent of the canvas loader. */
 import { useLanguage } from "@/i18n/LanguageProvider";
+import { measure } from "@/lib/measurement/client";
 import React, { useState } from "react";
 import { CountryFlag } from "./CountryFlag";
 import { identityMachineLines } from "./identity-data";
@@ -59,6 +60,10 @@ function TravelPage({
               left: `${((marker.x - TRAVEL_MAP.x) / TRAVEL_MAP.width) * 100}%`,
               top: `${((marker.y - TRAVEL_MAP.y) / TRAVEL_MAP.height) * 100}%`,
             }}
+            onPointerEnter={() =>
+              measure("city_view", { detail: marker.city.name })
+            }
+            onFocus={() => measure("city_view", { detail: marker.city.name })}
             onKeyDown={(e) => {
               if (e.key === "Escape") e.currentTarget.blur();
             }}
@@ -80,9 +85,11 @@ function TravelPage({
                 ? marker.city.uvNote
                 : marker.city.note) && (
                 <span>
-                  {t(uv && marker.city.uvNote
-                    ? marker.city.uvNote
-                    : marker.city.note)}
+                  {t(
+                    uv && marker.city.uvNote
+                      ? marker.city.uvNote
+                      : marker.city.note,
+                  )}
                 </span>
               )}
             </span>
@@ -90,16 +97,24 @@ function TravelPage({
         ))}
       </div>
       {!!memory.cities?.length && (
-        <div className="city-index" role="group" aria-label={t("Villes visitées")}>
+        <div
+          className="city-index"
+          role="group"
+          aria-label={t("Villes visitées")}
+        >
           {memory.cities.map((city) => (
             <button
               key={t(city.name)}
               type="button"
               aria-expanded={selected?.name === city.name}
               aria-controls={`city-detail-${index}`}
-              onClick={() =>
-                setSelected(selected?.name === city.name ? null : city)
-              }
+              onClick={() => {
+                if (selected?.name !== city.name)
+                  measure("city_view", { detail: city.name });
+                setSelected(selected?.name === city.name ? null : city);
+              }}
+              onPointerEnter={() => measure("city_view", { detail: city.name })}
+              onFocus={() => measure("city_view", { detail: city.name })}
               onKeyDown={(e) => {
                 if (e.key === "Escape") setSelected(null);
               }}
@@ -119,8 +134,10 @@ function TravelPage({
           <>
             <strong>{t(selected.name)}</strong>
             <p>
-              {t((uv && selected.uvNote ? selected.uvNote : selected.note) ??
-                countryName(memory.country))}
+              {t(
+                (uv && selected.uvNote ? selected.uvNote : selected.note) ??
+                  countryName(memory.country),
+              )}
             </p>
           </>
         )}
@@ -129,21 +146,30 @@ function TravelPage({
         <div className="simple-uv-memory">
           <strong>
             {memory.visits
-              ? t(`${memory.visits} ${memory.visits === 1 ? "séjour" : "séjours"}`)
+              ? t(
+                  `${memory.visits} ${memory.visits === 1 ? "séjour" : "séjours"}`,
+                )
               : t("Visité")}
           </strong>
           {memory.uvNote && <p>{t(memory.uvNote)}</p>}
         </div>
       )}
       <div className="simple-travel-sticker">
-        <h3 className="country-name"><CountryFlag code={memory.country} />{t(countryName(memory.country))}</h3>
+        <h3 className="country-name">
+          <CountryFlag code={memory.country} />
+          {t(countryName(memory.country))}
+        </h3>
         <p>
           {memory.visits
-            ? t(`${memory.visits} ${memory.visits === 1 ? "visite" : "visites"}`)
+            ? t(
+                `${memory.visits} ${memory.visits === 1 ? "visite" : "visites"}`,
+              )
             : t("Visité")}
         </p>
         {memory.places && (
-          <p className="memory-places">{memory.places.map((place) => t(place)).join(", ")}</p>
+          <p className="memory-places">
+            {memory.places.map((place) => t(place)).join(", ")}
+          </p>
         )}
       </div>
       <span className="simple-page-folio" aria-hidden="true">
@@ -165,10 +191,16 @@ export function SimplePassport({
   return (
     <div className="simple-view-document">
       {onUv && (
-        <button className="simple-uv-toggle" aria-pressed={uv} onClick={onUv}>{t("Lumière UV")}</button>
+        <button className="simple-uv-toggle" aria-pressed={uv} onClick={onUv}>
+          {t("Lumière UV")}
+        </button>
       )}
       {error && (
-        <p className="simple-error" role="status">{t("La vue 3D est indisponible. Les liens restent accessibles ci-dessous.")}</p>
+        <p className="simple-error" role="status">
+          {t(
+            "La vue 3D est indisponible. Les liens restent accessibles ci-dessous.",
+          )}
+        </p>
       )}
       <div
         className="simple-passport"
@@ -284,7 +316,9 @@ export function SimplePassport({
         )}
       </div>
       {onInteractive && (
-        <button className="simple-return" onClick={onInteractive}>{t("Revenir à la vue interactive")}</button>
+        <button className="simple-return" onClick={onInteractive}>
+          {t("Revenir à la vue interactive")}
+        </button>
       )}
     </div>
   );

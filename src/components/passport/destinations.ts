@@ -1,3 +1,4 @@
+import { measure, measurementEnabled } from "@/lib/measurement/client";
 export const destinations = [
   {
     id: "portfolio",
@@ -29,6 +30,8 @@ export function trackDestination(
   destination: DestinationId,
   placement: "scene" | "direct",
 ) {
+  if (!measurementEnabled()) return;
+  measure("outbound", { detail: destination, placement }, false);
   try {
     const body = JSON.stringify({ destination, placement });
     if (

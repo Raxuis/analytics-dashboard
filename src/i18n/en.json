@@ -114,5 +114,20 @@
   "UV activé. Origine des clics révélée sur chaque visa.": "UV enabled. Click sources revealed on each visa.",
   "Une vue correspond à un chargement de l’accueil, pas à un visiteur unique. Les clics comptent les liens activés. Les robots et les visites répétées peuvent être inclus. Conservation des données : sept jours.": "A view is a homepage load, not a unique visitor. Clicks count activated links. Bots and repeat visits may be included. Data is kept for seven days.",
   "Chypre du Nord": "Northern Cyprus",
-  "Chargements de page, pas visiteurs uniques.": "Page loads, not unique visitors."
+  "Chargements de page, pas visiteurs uniques.": "Page loads, not unique visitors.",
+  "Parcours dans le passeport": "Passport journeys",
+  "Nouvelle mesure depuis le": "New measurement since",
+  "La nouvelle mesure attend ses premières visites.": "The new measurement is waiting for its first visits.",
+  "Une session correspond à un onglet, avec 30 minutes d’inactivité maximum. Ce n’est pas une personne.": "A session is a browser tab, ending after 30 minutes of inactivity. It is not a person.",
+  "Sessions": "Sessions",
+  "Scène prête": "Scene ready",
+  "Passeport ouvert": "Passport opened",
+  "Pages ou villes explorées": "Pages or cities explored",
+  "Exploration suivie d’un lien": "Exploration followed by a link",
+  "Menu de liens ouvert": "Links menu opened",
+  "Menu suivi d’un lien": "Menu followed by a link",
+  "Au moins 30 secondes actives": "At least 30 active seconds",
+  "Les parcours peuvent se croiser. Les anciennes vues restent séparées.": "The journeys can overlap. Historical page loads remain separate.",
+  "Les parcours sont indisponibles pour le moment.": "Journey data is currently unavailable.",
+  "Une vue correspond à un chargement de l’accueil, pas à un visiteur unique. Les clics comptent les liens activés. Les robots connus et les tests exclus sont filtrés depuis la nouvelle mesure. Les anciens chiffres peuvent les inclure. Conservation des données : sept jours.": "A view is a homepage load, not a unique visitor. Clicks count activated links. Known bots and excluded tests are filtered since the new measurement began. Historical figures may include them. Data retention: seven days."
 }

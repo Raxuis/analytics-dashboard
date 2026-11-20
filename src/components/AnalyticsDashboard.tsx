@@ -1,4 +1,5 @@
 "use client";
+import type { JourneySummary } from "@/lib/measurement/summary";
 import { LanguageSwitch } from "@/i18n/LanguageSwitch";
 import { translate, type Locale } from "@/i18n/language";
 import { useLanguage } from "@/i18n/LanguageProvider";
@@ -27,24 +28,29 @@ function period(summary: AnalyticsSummary, locale: Locale) {
   const first = summary.days[0]?.date,
     last = summary.days.at(-1)?.date;
   if (!first || !last) return translate("Sept derniers jours", locale);
-  const longDate = new Intl.DateTimeFormat(locale === "en" ? "en-GB" : "fr-FR", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  });
+  const longDate = new Intl.DateTimeFormat(
+    locale === "en" ? "en-GB" : "fr-FR",
+    {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      timeZone: "UTC",
+    },
+  );
   return `${shortDate(first, locale)} ${locale === "en" ? "to" : "au"} ${longDate.format(dateOf(last))}`;
 }
 export default function AnalyticsDashboard({
   summary,
+  journeys,
 }: {
+  journeys?: JourneySummary | null;
   summary: AnalyticsSummary | null;
 }) {
   const { locale, t } = useLanguage();
   const numbers = new Intl.NumberFormat(locale === "en" ? "en-GB" : "fr-FR");
   const countryNames = new Intl.DisplayNames([locale], { type: "region" });
   const count = (value: number, noun: string) => {
-    const word = locale === "en" ? noun === "vue" ? "view" : "click" : noun;
+    const word = locale === "en" ? (noun === "vue" ? "view" : "click") : noun;
     return `${numbers.format(value)} ${word}${(locale === "en" ? value !== 1 : value > 1) ? "s" : ""}`;
   };
   const [uv, setUv] = useState(false);
@@ -54,7 +60,11 @@ export default function AnalyticsDashboard({
   return (
     <main className={`register-site ${uv ? "register-uv" : ""}`}>
       <header className="register-header">
-        <a href={locale === "en" ? "/en" : "/"} className="wordmark" aria-label={t("Raxuis, accueil")}>
+        <a
+          href={locale === "en" ? "/en" : "/"}
+          className="wordmark"
+          aria-label={t("Raxuis, accueil")}
+        >
           <Image
             src="/identity/raxuis-logo.png"
             width={28}
@@ -63,9 +73,12 @@ export default function AnalyticsDashboard({
           />
           <span>Raxuis</span>
         </a>
-        <div className="header-actions"><LanguageSwitch />
-        <a className="register-back" href={locale === "en" ? "/en" : "/"}>
-          <ArrowLeft size={15} />{t("Retour au passeport")}</a>
+        <div className="header-actions">
+          <LanguageSwitch />
+          <a className="register-back" href={locale === "en" ? "/en" : "/"}>
+            <ArrowLeft size={15} />
+            {t("Retour au passeport")}
+          </a>
         </div>
       </header>
       <div
@@ -79,13 +92,19 @@ export default function AnalyticsDashboard({
         >
           <div className="register-leaf-heading">
             <h1 id="register-title">{t("Passages")}</h1>
-            <p>{summary ? period(summary, locale) : t("Sept derniers jours")}</p>
+            <p>
+              {summary ? period(summary, locale) : t("Sept derniers jours")}
+            </p>
           </div>
-          <p className="register-counting-note">{t("Chargements de page, pas visiteurs uniques.")}</p>
+          <p className="register-counting-note">
+            {t("Chargements de page, pas visiteurs uniques.")}
+          </p>
           {summary ? (
             <>
               <table className="register-ledger">
-                <caption className="sr-only">{t("Vues de l’accueil et clics sortants par journée UTC")}</caption>
+                <caption className="sr-only">
+                  {t("Vues de l’accueil et clics sortants par journée UTC")}
+                </caption>
                 <thead>
                   <tr>
                     <th scope="col">Date</th>
@@ -139,15 +158,64 @@ export default function AnalyticsDashboard({
                   </tr>
                 </tfoot>
               </table>
-              <p className="register-timezone">{t("Journées comptées en UTC")}</p>
+              <details className="register-journeys">
+                <summary>{t("Parcours dans le passeport")}</summary>
+                {journeys ? (
+                  <>
+                    <p>
+                      {journeys.since
+                        ? `${t("Nouvelle mesure depuis le")} ${shortDate(journeys.since, locale)}.`
+                        : t(
+                            "La nouvelle mesure attend ses premières visites.",
+                          )}{" "}
+                      {t(
+                        "Une session correspond à un onglet, avec 30 minutes d’inactivité maximum. Ce n’est pas une personne.",
+                      )}
+                    </p>
+                    <dl>
+                      {(
+                        [
+                          ["Sessions", journeys.sessions],
+                          ["Scène prête", journeys.ready],
+                          ["Passeport ouvert", journeys.opened],
+                          ["Pages ou villes explorées", journeys.explored],
+                          ["Exploration suivie d’un lien", journeys.passport],
+                          ["Menu de liens ouvert", journeys.menu],
+                          ["Menu suivi d’un lien", journeys.direct],
+                          ["Au moins 30 secondes actives", journeys.active],
+                        ] as const
+                      ).map(([label, value]) => (
+                        <div key={label}>
+                          <dt>{t(label)}</dt>
+                          <dd>{numbers.format(value)}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                    <p>
+                      {t(
+                        "Les parcours peuvent se croiser. Les anciennes vues restent séparées.",
+                      )}
+                    </p>
+                  </>
+                ) : (
+                  <p>{t("Les parcours sont indisponibles pour le moment.")}</p>
+                )}
+              </details>
+              <p className="register-timezone">
+                {t("Journées comptées en UTC")}
+              </p>
               {summary.totalPageviews === 0 && summary.totalClicks === 0 && (
-                <p className="register-empty">{t("Aucun passage enregistré sur cette période.")}</p>
+                <p className="register-empty">
+                  {t("Aucun passage enregistré sur cette période.")}
+                </p>
               )}
             </>
           ) : (
             <div className="register-unavailable" role="status">
               <h2>{t("Le registre est indisponible.")}</h2>
-              <p>{t("Les passages ne peuvent pas être chargés pour le moment.")}</p>
+              <p>
+                {t("Les passages ne peuvent pas être chargés pour le moment.")}
+              </p>
               <button
                 onClick={() => startRefresh(() => router.refresh())}
                 disabled={refreshing}
@@ -200,9 +268,13 @@ export default function AnalyticsDashboard({
                     id={`register-origin-${d.id}`}
                     hidden={!expanded}
                   >
-                    <span>{t("Passeport")}<b>{numbers.format(stats?.scene ?? 0)}</b>
+                    <span>
+                      {t("Passeport")}
+                      <b>{numbers.format(stats?.scene ?? 0)}</b>
                     </span>
-                    <span>{t("Liens directs")}<b>{numbers.format(stats?.direct ?? 0)}</b>
+                    <span>
+                      {t("Liens directs")}
+                      <b>{numbers.format(stats?.direct ?? 0)}</b>
                     </span>
                   </span>
                 </button>
@@ -238,7 +310,10 @@ export default function AnalyticsDashboard({
                           {code}
                         </span>
                       )}
-                      <span className="country-name"><CountryFlag code={code} />{name}</span>
+                      <span className="country-name">
+                        <CountryFlag code={code} />
+                        {name}
+                      </span>
                       <span className="register-country-count">
                         {count(views, "vue")}
                       </span>
@@ -255,7 +330,8 @@ export default function AnalyticsDashboard({
             )}
             {!!summary?.unlocatedViews && (
               <p className="register-country-note">
-                {count(summary.unlocatedViews, "vue")} {t("sans pays renseigné")}
+                {count(summary.unlocatedViews, "vue")}{" "}
+                {t("sans pays renseigné")}
               </p>
             )}
           </section>
@@ -291,7 +367,11 @@ export default function AnalyticsDashboard({
           />
         </button>
       </div>
-      <p className="register-method">{t("Une vue correspond à un chargement de l’accueil, pas à un visiteur unique. Les clics comptent les liens activés. Les robots et les visites répétées peuvent être inclus. Conservation des données : sept jours.")}</p>
+      <p className="register-method">
+        {t(
+          "Une vue correspond à un chargement de l’accueil, pas à un visiteur unique. Les clics comptent les liens activés. Les robots connus et les tests exclus sont filtrés depuis la nouvelle mesure. Les anciens chiffres peuvent les inclure. Conservation des données : sept jours.",
+        )}
+      </p>
       <span className="sr-only" role="status">
         {refreshing
           ? t("Actualisation des statistiques…")

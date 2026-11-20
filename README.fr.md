@@ -73,3 +73,7 @@ Le passeport propose des indices contextuels pour ouvrir la couverture, glisser 
 ## Langues
 
 Le domaine `passport` affiche l’anglais et `passeport` le français. Les versions locales sont accessibles à `/en` et `/`. Le lien EN ou FR dans le header permet de changer de langue. Le dictionnaire anglais est dans `src/i18n/en.json` ; les données personnelles françaises restent dans `travel-content.ts`. Les noms de pays utilisent les données ISO et `Intl.DisplayNames`. Les pages imprimées, les villes, les souvenirs UV, le lecteur, les indications, le registre et les métadonnées suivent la langue. Les deux domaines partagent les mêmes compteurs, sans double enregistrement lors des réécritures internes.
+
+## Mesure des parcours
+
+Le registre conserve les anciennes vues et ajoute des parcours par session, distincts des personnes. Umami Cloud Hobby reçoit les interactions pour le tableau privé. Le [guide de mesure](docs/analytics-measurement.md) décrit les deux parcours, la déduplication, l’exclusion des tests avec `?analytics=off` et les vérifications.

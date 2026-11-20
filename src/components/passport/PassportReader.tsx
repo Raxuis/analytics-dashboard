@@ -1,4 +1,5 @@
 "use client";
+import { measure } from "@/lib/measurement/client";
 import { useLanguage } from "@/i18n/LanguageProvider";
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, Minimize2, Scan } from "lucide-react";
@@ -22,6 +23,9 @@ export function PassportReader({
   const dialog = useRef<HTMLDialogElement>(null);
   const body = useRef<HTMLDivElement>(null);
   const count = 2 + travelPages.length;
+  useEffect(() => {
+    if (page >= 2) measure("spread_view", { detail: String(Math.floor(page / 2)) });
+  }, [page]);
   const title =
     page === 0
       ? t("Identité")

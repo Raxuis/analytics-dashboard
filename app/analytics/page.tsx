@@ -1,3 +1,4 @@
+import { journeySummary, type JourneySummary } from "@/lib/measurement/summary";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import {
   analytics,
@@ -14,6 +15,12 @@ export const metadata = {
 };
 
 export default async function AnalyticsPage() {
+  let journeys: JourneySummary | null = null;
+  try {
+    journeys = await journeySummary();
+  } catch {
+    /* Missing aggregates stay unavailable. */
+  }
   let summary: AnalyticsSummary | null = null;
   try {
     const [pageviews, clicks] = await Promise.all([
@@ -24,5 +31,5 @@ export default async function AnalyticsPage() {
   } catch {
     // Unavailable data stays unavailable. Never fill the register with invented zeros.
   }
-  return <AnalyticsDashboard summary={summary} />;
+  return <AnalyticsDashboard summary={summary} journeys={journeys} />;
 }
