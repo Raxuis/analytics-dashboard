@@ -17,12 +17,13 @@ test("homepage response returns before Redis finishes recording the view", async
   process.env.REDIS_KEY = "test-only";
   let finish: ((value: Response) => void) | undefined;
   let background: Promise<unknown> | undefined;
-  globalThis.fetch = (() =>
-    new Promise<Response>((resolve) => {
-      finish = resolve;
-    })) as typeof fetch;
+  let stored: unknown;
+  globalThis.fetch = ((_url: unknown, init: RequestInit) => {
+    stored = JSON.parse(String(init.body));
+    return new Promise<Response>((resolve) => { finish = resolve; });
+  }) as typeof fetch;
   try {
-    const result = middleware(new NextRequest("https://passeport.raphaelraclot.dev/", { headers: { accept: "text/html" } }), {
+    const result = middleware(new NextRequest("https://passeport.raphaelraclot.dev/", { headers: { accept: "text/html", "x-vercel-ip-country": "FR" } }), {
       waitUntil(promise: Promise<unknown>) {
         background = promise;
       },
@@ -30,6 +31,7 @@ test("homepage response returns before Redis finishes recording the view", async
     assert.equal(result.status, 200);
     assert.equal(result.headers.get("x-middleware-next"), "1");
     assert.ok(background, "write must be attached to the background lifetime");
+    assert.ok(JSON.stringify(stored).includes("FR"), "the Vercel country header survives the Next 15 migration");
     assert.ok(finish, "Redis call has started but has not returned");
     finish(new Response(JSON.stringify([{ result: 1 }, { result: 1 }])));
     await background;

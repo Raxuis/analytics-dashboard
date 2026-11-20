@@ -20,7 +20,7 @@ export default function middleware(req: NextRequest, event: NextFetchEvent) {
     req.nextUrl.searchParams.get("analytics") !== "off" &&
     isAnalyticsConfigured()
   ) {
-    const country = req.geo?.country;
+    const country = req.headers.get("x-vercel-ip-country");
     event.waitUntil(
       analytics
         .track("pageview", {

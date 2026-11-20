@@ -13,7 +13,7 @@ import { PAGE_LEVEL, PAGE_BOW } from "./passport-geometry";
 export function DiscoveryMotion({ cue, reduced, cover, paper, page }: {
   cue: DiscoveryCue | null;
   reduced: boolean;
-  cover: RefObject<THREE.Group>;
+  cover: RefObject<THREE.Group | null>;
   paper: THREE.BufferGeometry;
   page: number;
 }) {

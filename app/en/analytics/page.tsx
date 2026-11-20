@@ -1,5 +1,6 @@
 import { passportMetadata } from "@/i18n/metadata";
-export { default, dynamic } from "../../analytics/page";
+export { default } from "../../analytics/page";
+export const dynamic = "force-dynamic";
 const base = passportMetadata("en");
 export const metadata = {
   ...base,

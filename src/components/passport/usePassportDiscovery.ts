@@ -15,7 +15,7 @@ export function usePassportDiscovery({ ready, open, page, paused, exploredCity, 
   const [hydrated, setHydrated] = useState(false);
   const [visible, setVisible] = useState(true);
   const [cue, setCue] = useState<DiscoveryCue | null>(null);
-  const timer = useRef<ReturnType<typeof setTimeout>>();
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const dismiss = useCallback(() => {
     clearTimeout(timer.current);
     setCue(null);

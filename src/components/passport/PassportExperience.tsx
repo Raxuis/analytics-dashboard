@@ -245,6 +245,7 @@ export default function PassportExperience() {
         onClick={() => setShowLinks(true)}
       >{t("Accéder aux liens")}</a>
       <header className="site-header">
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- A full document load resets the passport and records a real page load. */}
         <a href="/" className="wordmark" aria-label={t("Raxuis, accueil")}>
           <Image
             src="/identity/raxuis-logo.png"

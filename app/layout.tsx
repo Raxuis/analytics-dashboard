@@ -47,10 +47,10 @@ export const metadata: Metadata = {
     images: [{ url: site.image, alt: site.imageAlt }],
   },
 };
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const locale = headers().get("x-passport-locale") === "en" ? "en" : "fr";
+  const locale = (await headers()).get("x-passport-locale") === "en" ? "en" : "fr";
   return (
     <html lang={locale}>
       <body className={`${sans.variable} ${display.variable} ${ocr.variable}`}>

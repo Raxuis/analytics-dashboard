@@ -14,27 +14,31 @@
     "flags:generate": "node scripts/generate-flags.mjs"
   },
   "dependencies": {
-    "@react-three/fiber": "^8.18.0",
+    "@react-three/fiber": "9.8.2",
     "gsap": "^3.15.1",
-    "lucide-react": "^0.323.0",
-    "next": "14.2.35",
-    "react": "^18",
-    "react-dom": "^18",
+    "lucide-react": "0.468.0",
+    "next": "15.5.29",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "three": "^0.180.0"
   },
   "devDependencies": {
     "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
     "@types/three": "^0.180.0",
     "autoprefixer": "^10.0.1",
     "eslint": "^8",
-    "eslint-config-next": "14.1.0",
+    "eslint-config-next": "15.5.29",
     "flag-icons": "7.6.0",
-    "postcss": "^8",
+    "postcss": "^8.5.23",
     "sharp": "^0.35.5",
     "tailwindcss": "^3.3.0",
     "tsx": "^4.23.15",
     "typescript": "^5"
+  },
+  "overrides": {
+    "minimatch@>=7 <11.0.1": "^11.0.1",
+    "postcss": "$postcss"
   }
 }
