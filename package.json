@@ -28,7 +28,7 @@
     "@types/react-dom": "^19",
     "@types/three": "^0.180.0",
     "autoprefixer": "^10.0.1",
-    "eslint": "^8",
+    "eslint": "^10",
     "eslint-config-next": "15.5.29",
     "flag-icons": "7.6.0",
     "postcss": "^8.5.23",
