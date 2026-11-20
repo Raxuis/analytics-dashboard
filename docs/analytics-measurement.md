@@ -38,3 +38,5 @@ For detailed analysis in Umami, filter events by name, `detail`, `placement`, `l
 ## Verification
 
 `npm test` validates the endpoint, input policy and exclusions. `npx tsx scripts/check-journey-store.ts` is an opt-in integration check requiring Redis credentials. It uses isolated random QA keys, checks real atomic duplicate protection and reversed funnel sequences, and removes those temporary keys in `finally`. It never writes public counters. The initial successful integration check ran on 20 November 2026.
+
+Live verification on 20 November 2026 confirmed the real Umami arrival, readiness, opening, exploration, menu and direct outgoing events. One verification session with `utm_source=verification` and one GitHub click are included in the initial totals. The QA browser was then excluded on both public domains.

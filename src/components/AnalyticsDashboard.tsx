@@ -164,7 +164,7 @@ export default function AnalyticsDashboard({
                   <>
                     <p>
                       {journeys.since
-                        ? `${t("Nouvelle mesure depuis le")} ${shortDate(journeys.since, locale)}.`
+                        ? `${t("Nouvelle mesure depuis le")} ${shortDate(journeys.since, locale).replace(/\.$/, "")}.`
                         : t(
                             "La nouvelle mesure attend ses premières visites.",
                           )}{" "}
