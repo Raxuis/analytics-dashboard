@@ -4,11 +4,11 @@ import { NextRequest } from "next/server";
 import { POST } from "../app/api/events/route";
 
 function request(body: string, headers: Record<string, string> = {}) {
-  return new NextRequest("https://raxuis.test/api/events", {
+  return new NextRequest("https://passeport.raphaelraclot.dev/api/events", {
     method: "POST",
     body,
     headers: {
-      origin: "https://raxuis.test",
+      origin: "https://passeport.raphaelraclot.dev",
       "content-type": "application/json",
       ...headers,
     },

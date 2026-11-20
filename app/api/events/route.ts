@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { analytics, validateClick } from "@/utils/analytics";
+import { excludedRequest } from "@/lib/measurement/policy";
 import { isAnalyticsConfigured } from "@/lib/redis";
 
 export const dynamic = "force-dynamic";
@@ -10,6 +11,8 @@ export async function POST(request: NextRequest) {
   const origin = request.headers.get("origin");
   if (!origin || origin !== request.nextUrl.origin)
     return new NextResponse(null, { status: 403, headers: noStore });
+  if (excludedRequest(request.headers, request.nextUrl.hostname))
+    return new NextResponse(null, { status: 204, headers: noStore });
   const length = request.headers.get("content-length");
   if (length && Number(length) > 512)
     return new NextResponse(null, { status: 413, headers: noStore });

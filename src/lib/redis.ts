@@ -90,6 +90,9 @@ export function createRedis(env: RedisEnvironment, options: Options = {}) {
     }
   };
   return {
+    evaluate(script: string, keys: string[], args: string[]) {
+      return request(["EVAL", script, keys.length, ...keys, ...args]);
+    },
     async hgetall(key: string): Promise<Record<string, unknown>> {
       const result = await request(["HGETALL", key]);
       if (!Array.isArray(result) || result.length % 2)
