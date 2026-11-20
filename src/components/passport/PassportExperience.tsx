@@ -109,11 +109,14 @@ export default function PassportExperience() {
       setCity(value);
       if (value) {
         setExploredCity(true);
-        measure("city_view", { detail: value.city.name });
       }
     },
     [],
   );
+  const cityName = city?.city.name;
+  useEffect(() => {
+    if (cityName) measure("city_view", { detail: cityName });
+  }, [cityName]);
   const onTurn = useCallback((value: number) => {
     setPage(value);
     setSelected(null);

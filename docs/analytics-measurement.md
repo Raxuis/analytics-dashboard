@@ -33,7 +33,7 @@ Event properties are bounded and validated. Attribution is the first valid `utm_
 
 Production uses `NEXT_PUBLIC_UMAMI_SCRIPT_URL` and `NEXT_PUBLIC_UMAMI_WEBSITE_ID`. These are public tracker settings, never API credentials. Blank settings disable only Umami. The local register and navigation work independently. The tracker loads after the experience mounts; early events are queued with a 100-event cap. Automatic tracking is disabled; our bridge sends one sanitized page load per document and explicit events. Failure or blocking of either collector does not block links or the passport.
 
-For detailed analysis in Umami, filter events by name, `detail`, `placement`, `locale` and `source`. Umami names outgoing events `outbound_scene` and `outbound_direct` so private funnels can distinguish the two paths without a paid API. Configure funnel reports with the ordered events above and the corresponding outgoing event. For campaign links, add a short `utm_source`, for example `?utm_source=github`. Campaign, medium and content attribution can be added later if there is an actual reporting need.
+For detailed analysis in Umami, filter events by name, `detail`, `placement`, `locale` and `source`. Umami names outgoing events `outbound_scene` and `outbound_direct` so private funnels can distinguish the two paths without a paid API. Two saved reports are configured in Umami: **Passport exploration** (arrival, scene ready, opened, spread viewed, scene link) and **Direct links** (arrival, menu, direct link). The public exploration milestone also accepts city discovery. For campaign links, add a short `utm_source`, for example `?utm_source=github`. Campaign, medium and content attribution can be added later if there is an actual reporting need.
 
 ## Verification
 
